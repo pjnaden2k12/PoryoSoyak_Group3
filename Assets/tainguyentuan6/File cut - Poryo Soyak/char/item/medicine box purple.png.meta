@@ -147,7 +147,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      medicine box purple_0: -1278046289732407938
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
