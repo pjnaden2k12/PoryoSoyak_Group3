@@ -173,7 +173,8 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      medicine box yellow_0: -1316317608693992663
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
