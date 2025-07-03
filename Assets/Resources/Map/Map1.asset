@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a47bc7ad2be87448af44765eaad2bfd, type: 3}
-  m_Name: MapData
+  m_Name: Map1
   m_EditorClassIdentifier: 
   blocks:
   - id: 0
@@ -85,17 +85,11 @@ MonoBehaviour:
     hasNoBlock: 0
     hasMedicine: 0
     medicineTypeIndices: 
-  - id: 0
-    position: {x: -2, y: 0}
-    type: 2
-    hasNoBlock: 0
-    hasMedicine: 0
-    medicineTypeIndices: 
   players: []
   items:
-  - position: {x: 5, y: 0}
+  - position: {x: 7.4, y: 0.3}
     typeIndex: 0
-  - position: {x: 5, y: -1}
+  - position: {x: 7.4, y: -0.7}
     typeIndex: 1
-  - position: {x: 5, y: -2}
+  - position: {x: 7.4, y: -1.7}
     typeIndex: 2

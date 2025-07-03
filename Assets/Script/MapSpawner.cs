@@ -1,9 +1,13 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class MapSpawner : MonoBehaviour
 {
-    public MapData mapData;
+    [Header("Map Data")]
+    public GameMapList mapList;     // <-- ScriptableObject chứa danh sách các map
+    public int selectedMapIndex;    // <-- chọn map nào để spawn
+
+    private MapData mapData;        // <-- map đang spawn
 
     [Header("Block Prefabs")]
     public GameObject prefabUpLeft;
@@ -27,12 +31,19 @@ public class MapSpawner : MonoBehaviour
 
     void Start()
     {
+        if (mapList == null || selectedMapIndex < 0 || selectedMapIndex >= mapList.allMaps.Length)
+        {
+            Debug.LogError("Map không hợp lệ hoặc chưa được cấu hình.");
+            return;
+        }
+
+        mapData = mapList.allMaps[selectedMapIndex]; // lấy map cần spawn
+
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
         SpawnMedicines();
     }
-
     void SpawnBlocks()
     {
         foreach (var data in mapData.blocks)
@@ -40,7 +51,8 @@ public class MapSpawner : MonoBehaviour
             GameObject prefab = GetBlockPrefab(data.type);
             if (prefab == null) continue;
 
-            GameObject block = Instantiate(prefab, (Vector3)data.position, Quaternion.identity);
+            // Spawn block làm child của đối tượng chứa MapSpawner
+            GameObject block = Instantiate(prefab, (Vector3)data.position, Quaternion.identity, transform);  // 'transform' là đối tượng chứa script MapSpawner
             block.tag = "Block";
 
             BlockID blockID = block.GetComponent<BlockID>();
@@ -49,11 +61,14 @@ public class MapSpawner : MonoBehaviour
 
             if (data.hasNoBlock && noBlockChildPrefab != null)
             {
+                // Spawn child nếu có
                 GameObject child = Instantiate(noBlockChildPrefab, block.transform);
                 child.transform.localPosition = Vector3.zero;
             }
 
             spawnedBlocksById[data.id] = block.transform;
+            Vector2Int posInt = new Vector2Int(Mathf.RoundToInt(data.position.x), Mathf.RoundToInt(data.position.y));
+            BlockPositionManager.blockPositions.Add(posInt);
         }
     }
 
@@ -62,7 +77,10 @@ public class MapSpawner : MonoBehaviour
         foreach (var p in mapData.players)
         {
             if (p.typeIndex < playerPrefabs.Length)
-                Instantiate(playerPrefabs[p.typeIndex], (Vector3)p.position, Quaternion.identity);
+            {
+                // Spawn player làm child của đối tượng chứa MapSpawner
+                Instantiate(playerPrefabs[p.typeIndex], (Vector3)p.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
+            }
         }
     }
 
@@ -71,7 +89,10 @@ public class MapSpawner : MonoBehaviour
         foreach (var item in mapData.items)
         {
             if (item.typeIndex < itemPrefabs.Length)
-                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity);
+            {
+                // Spawn item làm child của đối tượng chứa MapSpawner
+                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
+            }
         }
     }
 
@@ -89,9 +110,8 @@ public class MapSpawner : MonoBehaviour
             {
                 if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
                 {
-                    Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity);
-                    // Nếu muốn làm child:
-                    // Instantiate(medicinePrefabs[typeIndex], blockTransform).transform.localPosition = Vector3.zero;
+                    // Spawn medicine làm child của đối tượng chứa MapSpawner
+                    Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
                 }
                 else
                 {
@@ -115,5 +135,9 @@ public class MapSpawner : MonoBehaviour
             _ => null,
         };
     }
-
+   
+}
+public static class BlockPositionManager
+{
+    public static HashSet<Vector2Int> blockPositions = new();
 }

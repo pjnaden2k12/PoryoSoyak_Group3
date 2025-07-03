@@ -8,17 +8,16 @@ public class DragItem : MonoBehaviour
     private bool isDragging = false;
     private Vector3 startPosition;
     private Transform currentBlock = null;
-
-    // LayerMask chỉ raycast vào ItemLayer
     private LayerMask itemLayer;
+    public bool isSnapped = false;
 
     void Start()
     {
         cam = Camera.main;
         startPosition = transform.position;
-        itemLayer = LayerMask.GetMask("Item");
+        itemLayer = LayerMask.GetMask("ItemLayer");
 
-        if (gameObject.layer != LayerMask.NameToLayer("Item"))
+        if (gameObject.layer != LayerMask.NameToLayer("ItemLayer"))
         {
             Debug.LogWarning($"{gameObject.name} không ở layer 'ItemLayer'. Vui lòng gán layer đúng để kéo được.");
         }
@@ -32,7 +31,6 @@ public class DragItem : MonoBehaviour
             Vector3 worldPoint = cam.ScreenToWorldPoint(new Vector3(mousePos.x, mousePos.y, cam.nearClipPlane));
             worldPoint.z = 0f;
 
-            // Raycast chỉ vào ItemLayer để tránh bị block chặn
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero, Mathf.Infinity, itemLayer);
 
             if (hit.collider != null && hit.collider.gameObject == gameObject)
@@ -60,7 +58,6 @@ public class DragItem : MonoBehaviour
             bool hitNoBlock = false;
             bool snapped = false;
 
-            // 1. Nếu đụng noBlock → không snap, quay lại chỗ cũ
             foreach (Collider2D col in hits)
             {
                 if (col.CompareTag("noBlock"))
@@ -72,16 +69,19 @@ public class DragItem : MonoBehaviour
 
             if (hitNoBlock)
             {
-                Debug.Log("Vùng cấm snap (noBlock) → Quay về vị trí cũ");
                 if (currentBlock != null)
+                {
                     transform.position = currentBlock.position;
+                    isSnapped = true;
+                }
                 else
+                {
                     transform.position = startPosition;
-
-                return; // dừng lại luôn, không xét tiếp
+                    isSnapped = false;
+                }
+                return;
             }
 
-            // 2. Nếu không đụng noBlock → tìm block để snap
             foreach (Collider2D col in hits)
             {
                 if (col.CompareTag("Block"))
@@ -89,19 +89,24 @@ public class DragItem : MonoBehaviour
                     transform.position = col.transform.position;
                     currentBlock = col.transform;
                     snapped = true;
+                    isSnapped = true;
                     break;
                 }
             }
 
-            // 3. Nếu không snap được vào block nào → về vị trí trước đó
             if (!snapped)
             {
                 if (currentBlock != null)
+                {
                     transform.position = currentBlock.position;
+                    isSnapped = true;
+                }
                 else
+                {
                     transform.position = startPosition;
+                    isSnapped = false;
+                }
             }
         }
-
     }
 }

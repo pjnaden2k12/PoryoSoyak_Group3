@@ -7,7 +7,9 @@ TagManager:
   - Block
   - Item
   - noBlock
-  - Medicine
+  - mdSquare
+  - mdTriangle
+  - mdCircle
   layers:
   - Default
   - TransparentFX
@@ -15,7 +17,7 @@ TagManager:
   - Map
   - Water
   - UI
-  - Item
+  - ItemLayer
   - BlockLayer
   - Medicine
   - 

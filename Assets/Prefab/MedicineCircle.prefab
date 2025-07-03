@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1686431882232608098}
   m_Layer: 8
   m_Name: MedicineCircle
-  m_TagString: Medicine
+  m_TagString: mdCircle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -149,3 +149,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDelay: 0.5
   moveDuration: 0.3
+  currentTypeIndex: 0
+  medicineSprites:
+  - {fileID: 21300000, guid: 66d892710cd9090499e0fc4cbb43f3f6, type: 3}
+  - {fileID: 21300000, guid: 9fb0881385ddb9840a2fc3879838fff2, type: 3}
+  - {fileID: 21300000, guid: f80aac752e8684f4c8aee1de68ed0577, type: 3}
+  spriteRenderer: {fileID: 8634987180234274179}

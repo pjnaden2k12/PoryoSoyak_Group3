@@ -11,14 +11,14 @@ public class MedicineAutoMove : MonoBehaviour
     private int blockLayerMask;
     public static bool isPlayPressed = false;
 
-    public GameObject[] medicinePrefabs;
-    private GameObject currentMedicinePrefabInstance;
-
     public int currentTypeIndex = 0;
-
+    public Sprite[] medicineSprites;
+    public SpriteRenderer spriteRenderer;
+    private int itemLayerMask;
     void Start()
     {
         blockLayerMask = LayerMask.GetMask("BlockLayer");
+        itemLayerMask = LayerMask.GetMask("ItemLayer");
 
         BlockID[] allBlocks = Object.FindObjectsByType<BlockID>(FindObjectsSortMode.None);
         maxId = 0;
@@ -29,7 +29,7 @@ public class MedicineAutoMove : MonoBehaviour
         }
         maxId += 1;
 
-        SpawnMedicinePrefab(currentTypeIndex);
+        UpdateAppearance();
     }
 
     void Update()
@@ -107,36 +107,57 @@ public class MedicineAutoMove : MonoBehaviour
 
     void CheckForItem()
     {
-        Collider2D item = Physics2D.OverlapCircle(transform.position, 0.1f);
-        if (item != null && item.CompareTag("Item"))
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.1f);
+        
+
+        foreach (var hit in hits)
         {
-            ItemType itemType = item.GetComponent<ItemType>();
-            if (itemType != null)
+           
+
+            if (hit.CompareTag("Item"))
             {
-                int itemTypeIndex = itemType.typeIndex;
-                if (itemTypeIndex != currentTypeIndex)
+                ItemType itemType = hit.GetComponent<ItemType>();
+                if (itemType != null)
                 {
-                    currentTypeIndex = itemTypeIndex;
-                    SpawnMedicinePrefab(currentTypeIndex);
-                    Debug.Log($"Medicine type changed to {currentTypeIndex} due to item collision.");
+                    if (itemType.typeIndex != currentTypeIndex)
+                    {
+                        currentTypeIndex = itemType.typeIndex;
+                        Debug.Log($"Changed type to {currentTypeIndex}");
+                        UpdateAppearance();
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("No ItemType found on item.");
                 }
             }
         }
     }
 
-    void SpawnMedicinePrefab(int typeIndex)
+    void UpdateAppearance()
     {
-        if (currentMedicinePrefabInstance != null)
-            Destroy(currentMedicinePrefabInstance);
-
-        if (typeIndex < 0 || typeIndex >= medicinePrefabs.Length)
-        {
-            Debug.LogWarning("Invalid medicine prefab index.");
+        if (spriteRenderer == null || currentTypeIndex < 0 || currentTypeIndex >= medicineSprites.Length)
             return;
-        }
 
-        currentMedicinePrefabInstance = Instantiate(medicinePrefabs[typeIndex], transform.position, Quaternion.identity);
-        currentMedicinePrefabInstance.name = $"Medicine_Type_{typeIndex}";
-        currentMedicinePrefabInstance.transform.parent = null;
+        // Scale nhỏ lại
+        transform.DOScale(Vector3.zero, 0.15f).SetEase(Ease.InBack).OnComplete(() =>
+        {
+            // Đổi sprite và tag
+            spriteRenderer.sprite = medicineSprites[currentTypeIndex];
+
+            switch (currentTypeIndex)
+            {
+                case 0: tag = "mdCircle"; break;
+                case 1: tag = "mdSquare"; break;
+                case 2: tag = "mdTriangle"; break;
+            }
+
+           
+
+            // Scale to full size
+            transform.DOScale(Vector3.one, 0.15f).SetEase(Ease.OutBack);
+        });
     }
+
+
 }
