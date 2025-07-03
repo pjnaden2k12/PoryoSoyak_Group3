@@ -2,18 +2,22 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Block
+  - Item
+  - noBlock
+  - Medicine
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Map
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Item
+  - BlockLayer
+  - Medicine
   - 
   - 
   - 
@@ -41,3 +45,11 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Map
+    uniqueID: 3141952509
+    locked: 0
+  - name: Item
+    uniqueID: 4234121323
+    locked: 0
+  m_RenderingLayers:
+  - Default
