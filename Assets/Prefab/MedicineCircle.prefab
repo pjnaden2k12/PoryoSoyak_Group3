@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 8634987180234274179}
   - component: {fileID: 2260151883615540268}
   - component: {fileID: 1686431882232608098}
-  - component: {fileID: 6321249828266359280}
   m_Layer: 8
   m_Name: MedicineCircle
   m_TagString: Medicine
@@ -150,22 +149,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveDelay: 0.5
   moveDuration: 0.3
---- !u!114 &6321249828266359280
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4236013153780925811}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d3a3fa40c972d740985bc513e42acf1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemLayerMask:
-    serializedVersion: 2
-    m_Bits: 64
-  medicinePrefabs:
-  - {fileID: 4236013153780925811}
-  - {fileID: 4236013153780925811, guid: 8961111224ca10c45924dcea07b5109a, type: 3}
-  - {fileID: 4236013153780925811, guid: a7c7c181e43334747a39abf934e0b6ef, type: 3}

@@ -92,4 +92,10 @@ MonoBehaviour:
     hasMedicine: 0
     medicineTypeIndices: 
   players: []
-  items: []
+  items:
+  - position: {x: 5, y: 0}
+    typeIndex: 0
+  - position: {x: 5, y: -1}
+    typeIndex: 1
+  - position: {x: 5, y: -2}
+    typeIndex: 2

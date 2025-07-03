@@ -3,13 +3,19 @@ using DG.Tweening;
 
 public class MedicineAutoMove : MonoBehaviour
 {
-    public float moveDelay = 0.2f;       // Thời gian nghỉ giữa các lần di chuyển
-    public float moveDuration = 0.3f;    // Thời gian để di chuyển 1f
+    public float moveDelay = 0.2f;
+    public float moveDuration = 0.3f;
     private bool isMoving = false;
 
     private int maxId = 0;
     private int blockLayerMask;
     public static bool isPlayPressed = false;
+
+    public GameObject[] medicinePrefabs;
+    private GameObject currentMedicinePrefabInstance;
+
+    public int currentTypeIndex = 0;
+
     void Start()
     {
         blockLayerMask = LayerMask.GetMask("BlockLayer");
@@ -22,6 +28,8 @@ public class MedicineAutoMove : MonoBehaviour
                 maxId = block.id;
         }
         maxId += 1;
+
+        SpawnMedicinePrefab(currentTypeIndex);
     }
 
     void Update()
@@ -31,7 +39,6 @@ public class MedicineAutoMove : MonoBehaviour
         if (!isMoving)
             TryMoveToNextBlock();
     }
-
 
     void TryMoveToNextBlock()
     {
@@ -47,7 +54,7 @@ public class MedicineAutoMove : MonoBehaviour
 
         if (currentId == -1)
         {
-            Debug.LogWarning("Player not on a valid block.");
+            Debug.LogWarning("Medicine not on a valid block.");
             return;
         }
 
@@ -81,20 +88,55 @@ public class MedicineAutoMove : MonoBehaviour
         }
     }
 
-
     void MoveToBlock(Vector3 destination)
     {
         isMoving = true;
 
-        // Di chuyển 1f trong thời gian cố định (ví dụ 0.3 giây)
         transform.DOMove(destination, moveDuration)
             .SetEase(Ease.InOutSine)
             .OnComplete(() =>
             {
+                CheckForItem();
+
                 DOVirtual.DelayedCall(moveDelay, () =>
                 {
                     isMoving = false;
                 });
             });
+    }
+
+    void CheckForItem()
+    {
+        Collider2D item = Physics2D.OverlapCircle(transform.position, 0.1f);
+        if (item != null && item.CompareTag("Item"))
+        {
+            ItemType itemType = item.GetComponent<ItemType>();
+            if (itemType != null)
+            {
+                int itemTypeIndex = itemType.typeIndex;
+                if (itemTypeIndex != currentTypeIndex)
+                {
+                    currentTypeIndex = itemTypeIndex;
+                    SpawnMedicinePrefab(currentTypeIndex);
+                    Debug.Log($"Medicine type changed to {currentTypeIndex} due to item collision.");
+                }
+            }
+        }
+    }
+
+    void SpawnMedicinePrefab(int typeIndex)
+    {
+        if (currentMedicinePrefabInstance != null)
+            Destroy(currentMedicinePrefabInstance);
+
+        if (typeIndex < 0 || typeIndex >= medicinePrefabs.Length)
+        {
+            Debug.LogWarning("Invalid medicine prefab index.");
+            return;
+        }
+
+        currentMedicinePrefabInstance = Instantiate(medicinePrefabs[typeIndex], transform.position, Quaternion.identity);
+        currentMedicinePrefabInstance.name = $"Medicine_Type_{typeIndex}";
+        currentMedicinePrefabInstance.transform.parent = null;
     }
 }
