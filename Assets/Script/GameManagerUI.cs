@@ -61,8 +61,8 @@ public class GameManagerUI : MonoBehaviour
                 else
                 {
                     // Nếu item đã snap, vẫn bật các tính năng di chuyển
-                    if (dragMove != null) dragMove.enabled = true;  // Bật khả năng di chuyển
-                    if (dragItem != null) dragItem.enabled = true;  // Bật khả năng di chuyển
+                    if (dragMove != null) dragMove.enabled = false;  // Bật khả năng di chuyển
+                    if (dragItem != null) dragItem.enabled = false;  // Bật khả năng di chuyển
 
                     Collider2D col = item.GetComponent<Collider2D>();
                     if (col != null) col.enabled = true;  // Bật collider
@@ -116,6 +116,7 @@ public class GameManagerUI : MonoBehaviour
     public void OnReplayButtonPressed()
     {
         MedicineAutoMove.isPlayPressed = false;
+        DOTween.KillAll();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
