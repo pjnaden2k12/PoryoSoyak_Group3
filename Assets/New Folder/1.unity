@@ -312,8 +312,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 26.7579, y: -144.4006}
-  m_SizeDelta: {x: 253.5156, y: 193.1684}
+  m_AnchoredPosition: {x: 37.10791, y: -97.28775}
+  m_SizeDelta: {x: 392.2031, y: 361.1208}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &198072292
 CanvasRenderer:
@@ -918,15 +918,25 @@ MonoBehaviour:
   lines:
   - speakerName: tim
     speakerImage: {fileID: -6801200627065716493, guid: 5121ab354eaa21d4db4ae7f2b60c1a57, type: 3}
-    dialogueText: slfbssbvsilvbshrv
+    dialogueText: 'Welcome to the Cube Realm!
+
+      Only the strongest minds can
+      survive here.'
     isLeftSide: 1
   - speakerName: do
     speakerImage: {fileID: 6122609282384432122, guid: 6de79d0e4c8757042a7a1e4ad8ce04fb, type: 3}
-    dialogueText: cccccccccccccccc
+    dialogueText: 'What is this place?
+
+      Why am I... a cube?'
     isLeftSide: 0
   - speakerName: tim
     speakerImage: {fileID: -6801200627065716493, guid: 5121ab354eaa21d4db4ae7f2b60c1a57, type: 3}
-    dialogueText: cccccccccccccccc
+    dialogueText: And if I fall?
+    isLeftSide: 1
+  - speakerName: tim
+    speakerImage: {fileID: -6801200627065716493, guid: 5121ab354eaa21d4db4ae7f2b60c1a57, type: 3}
+    dialogueText: "Then you restart. Simple as that.\nBut be careful \u2014 the path
+      isn't as easy as it looks.\nNow go. Show us you\u2019re more than just a block."
     isLeftSide: 1
   leftImage: {fileID: 536926511}
   rightImage: {fileID: 14021609}
