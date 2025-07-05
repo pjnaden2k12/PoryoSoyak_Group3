@@ -6,7 +6,7 @@ public class MapData : ScriptableObject
     public BlockEntry[] blocks;
     public SpawnEntry[] players;
     public SpawnEntry[] items;
-  
+    public float playTimeLimit = 60f;
 }
 
 [System.Serializable]
@@ -18,7 +18,7 @@ public struct BlockEntry
     public bool hasNoBlock;
 
     public bool hasMedicine;
-    public int[] medicineTypeIndices; // Danh sách các loại medicine (theo index prefab) gắn vào block này
+    public int medicineTypeIndices; 
 }
 
 

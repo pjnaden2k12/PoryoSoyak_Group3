@@ -2,16 +2,71 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class GameManagerUI : MonoBehaviour
 {
     public Button playButton;
     public Button pauseButton;
-    private bool isGamePlaying = false;
+
+    public TextMeshProUGUI requiredTimeText1;
+    public TextMeshProUGUI requiredTimeText2;
+
+    public TextMeshProUGUI elapsedTimeText1;
+    public TextMeshProUGUI elapsedTimeText2;
+
+    void Start()
+    {
+        pauseButton.gameObject.SetActive(false);
+
+        SetTwoDigitText(requiredTimeText1, requiredTimeText2, Mathf.CeilToInt(GameManager.Instance.requiredTime));
+        SetTwoDigitText(elapsedTimeText1, elapsedTimeText2, 0);
+
+        GameManager.Instance.OnTimerUpdate += UpdateElapsedTime;
+        GameManager.Instance.OnGameStateChanged += UpdateUIState;
+        GameManager.Instance.OnGameEnded += OnGameEnded;
+
+    }
+
+    void OnDestroy()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnTimerUpdate -= UpdateElapsedTime;
+            GameManager.Instance.OnGameStateChanged -= UpdateUIState;
+            GameManager.Instance.OnGameEnded -= OnGameEnded;
+
+        }
+    }
+    void OnGameEnded(bool isWin)
+    {
+        playButton.gameObject.SetActive(false);
+        pauseButton.gameObject.SetActive(false);
+    }
+
+    void UpdateElapsedTime(int seconds)
+    {
+        SetTwoDigitText(elapsedTimeText1, elapsedTimeText2, seconds);
+    }
+
+    void SetTwoDigitText(TextMeshProUGUI text1, TextMeshProUGUI text2, int number)
+    {
+        number = Mathf.Clamp(number, 0, 99);
+        int tens = number / 10;
+        int ones = number % 10;
+        text1.text = tens.ToString();
+        text2.text = ones.ToString();
+    }
+
+    void UpdateUIState(bool isPlaying)
+    {
+        playButton.gameObject.SetActive(!isPlaying);
+        pauseButton.gameObject.SetActive(isPlaying);
+        UpdateItemsState(isPlaying);
+    }
 
     public void OnPlayPauseButtonPressed()
     {
-        // Thêm hiệu ứng scale cho nút Play và Pause khi nhấn
         playButton.transform.DOScale(1.1f, 0.1f).OnComplete(() => {
             playButton.transform.DOScale(1f, 0.1f);
         });
@@ -20,93 +75,69 @@ public class GameManagerUI : MonoBehaviour
             pauseButton.transform.DOScale(1f, 0.1f);
         });
 
-        isGamePlaying = !isGamePlaying;
+        GameManager.Instance.TogglePlayPause();
+    }
 
-        if (isGamePlaying)
+    void UpdateItemsState(bool isPlaying)
+    {
+        GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
+        foreach (GameObject item in items)
         {
-            // Khi nhấn Play, sẽ bắt đầu trò chơi
-            playButton.gameObject.SetActive(false);  // Ẩn Play
-            pauseButton.gameObject.SetActive(true);  // Hiện Pause
-            MedicineAutoMove.isPlayPressed = true;  // Kích hoạt việc di chuyển của medicine
+            DragMove dragMove = item.GetComponent<DragMove>();
+            DragItem dragItem = item.GetComponent<DragItem>();
 
-            GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
-            foreach (GameObject item in items)
+            bool isSnapped = false;
+            if (dragMove != null) isSnapped = dragMove.isSnapped;
+            if (dragItem != null) isSnapped = dragItem.isSnapped;
+
+            if (isPlaying)
             {
-                DragMove dragMove = item.GetComponent<DragMove>();
-                DragItem dragItem = item.GetComponent<DragItem>();
-
-                bool isSnapped = false;
-
-                // Kiểm tra xem item có snap hay không
-                if (dragMove != null) isSnapped = dragMove.isSnapped;
-                if (dragItem != null) isSnapped = dragItem.isSnapped;
-
-                // Chỉ làm mờ item chưa snap
                 if (!isSnapped)
                 {
-                    if (dragMove != null) dragMove.enabled = false;  // Tắt khả năng di chuyển
-                    if (dragItem != null) dragItem.enabled = false;  // Tắt khả năng di chuyển
+                    if (dragMove != null) dragMove.enabled = false;
+                    if (dragItem != null) dragItem.enabled = false;
 
                     Collider2D col = item.GetComponent<Collider2D>();
-                    if (col != null) col.enabled = false;  // Tắt collider
+                    if (col != null) col.enabled = false;
 
                     SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
                     if (sr != null)
                     {
                         Color c = sr.color;
-                        c.a = 0.4f;  // Đặt alpha = 0.4 (làm mờ item)
+                        c.a = 0.4f;
                         sr.color = c;
                     }
                 }
                 else
                 {
-                    // Nếu item đã snap, vẫn bật các tính năng di chuyển
-                    if (dragMove != null) dragMove.enabled = false;  // Bật khả năng di chuyển
-                    if (dragItem != null) dragItem.enabled = false;  // Bật khả năng di chuyển
+                    if (dragMove != null) dragMove.enabled = false;
+                    if (dragItem != null) dragItem.enabled = false;
 
                     Collider2D col = item.GetComponent<Collider2D>();
-                    if (col != null) col.enabled = true;  // Bật collider
+                    if (col != null) col.enabled = true;
 
                     SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
                     if (sr != null)
                     {
                         Color c = sr.color;
-                        c.a = 1f;  // Đặt alpha = 1 (hiển thị rõ ràng)
+                        c.a = 1f;
                         sr.color = c;
                     }
                 }
             }
-        }
-        else
-        {
-            // Khi nhấn Pause, sẽ tạm dừng trò chơi
-            playButton.gameObject.SetActive(true);  // Hiện Play
-            pauseButton.gameObject.SetActive(false);  // Ẩn Pause
-            MedicineAutoMove.isPlayPressed = false;  // Dừng trò chơi
-
-            GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
-            foreach (GameObject item in items)
+            else
             {
-                DragMove dragMove = item.GetComponent<DragMove>();
-                DragItem dragItem = item.GetComponent<DragItem>();
-
-                bool isSnapped = false;
-
-                if (dragMove != null) isSnapped = dragMove.isSnapped;
-                if (dragItem != null) isSnapped = dragItem.isSnapped;
-
-                // Khi Pause, tất cả các item sẽ được bật lại và có thể di chuyển
-                if (dragMove != null) dragMove.enabled = true;  // Bật khả năng di chuyển
-                if (dragItem != null) dragItem.enabled = true;  // Bật khả năng di chuyển
+                if (dragMove != null) dragMove.enabled = true;
+                if (dragItem != null) dragItem.enabled = true;
 
                 Collider2D col = item.GetComponent<Collider2D>();
-                if (col != null) col.enabled = true;  // Bật collider
+                if (col != null) col.enabled = true;
 
                 SpriteRenderer sr = item.GetComponent<SpriteRenderer>();
                 if (sr != null)
                 {
                     Color c = sr.color;
-                    c.a = 1f;  // Đặt alpha = 1 (hiển thị rõ ràng)
+                    c.a = 1f;
                     sr.color = c;
                 }
             }
@@ -117,6 +148,7 @@ public class GameManagerUI : MonoBehaviour
     {
         MedicineAutoMove.isPlayPressed = false;
         DOTween.KillAll();
+        GameManager.Instance.ResetGame();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

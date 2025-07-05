@@ -20,7 +20,7 @@ TagManager:
   - ItemLayer
   - BlockLayer
   - Medicine
-  - 
+  - Player
   - 
   - 
   - 
@@ -52,6 +52,9 @@ TagManager:
     locked: 0
   - name: Item
     uniqueID: 4234121323
+    locked: 0
+  - name: Player
+    uniqueID: 1411289459
     locked: 0
   m_RenderingLayers:
   - Default

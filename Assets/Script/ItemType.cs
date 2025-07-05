@@ -2,5 +2,5 @@
 
 public class ItemType : MonoBehaviour
 {
-    public int typeIndex; // 0 hoặc 1, 2...
+    public int typeIndex;
 }

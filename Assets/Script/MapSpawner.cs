@@ -7,7 +7,7 @@ public class MapSpawner : MonoBehaviour
     public GameMapList mapList;     // <-- ScriptableObject chứa danh sách các map
     public int selectedMapIndex;    // <-- chọn map nào để spawn
 
-    private MapData mapData;        // <-- map đang spawn
+    public MapData mapData;        // <-- map đang spawn
 
     [Header("Block Prefabs")]
     public GameObject prefabUpLeft;
@@ -38,7 +38,7 @@ public class MapSpawner : MonoBehaviour
         }
 
         mapData = mapList.allMaps[selectedMapIndex]; // lấy map cần spawn
-
+        GameManager.Instance.requiredTime = mapData.playTimeLimit;
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
@@ -97,30 +97,27 @@ public class MapSpawner : MonoBehaviour
     }
 
     void SpawnMedicines()
+{
+    foreach (var block in mapData.blocks)
     {
-        foreach (var block in mapData.blocks)
+        if (!block.hasMedicine)
+            continue;
+
+        if (!spawnedBlocksById.TryGetValue(block.id, out Transform blockTransform))
+            continue;
+
+        int typeIndex = block.medicineTypeIndices;
+        if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
         {
-            if (!block.hasMedicine || block.medicineTypeIndices == null)
-                continue;
-
-            if (!spawnedBlocksById.TryGetValue(block.id, out Transform blockTransform))
-                continue;
-
-            foreach (var typeIndex in block.medicineTypeIndices)
-            {
-                if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
-                {
-                    // Spawn medicine làm child của đối tượng chứa MapSpawner
-                    Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
-                }
-                else
-                {
-                    Debug.LogWarning($"Invalid medicine typeIndex {typeIndex} on block ID {block.id}");
-                }
-            }
+            // Spawn medicine làm child của đối tượng chứa MapSpawner
+            Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity, transform);
+        }
+        else
+        {
+            Debug.LogWarning($"Invalid medicine typeIndex {typeIndex} on block ID {block.id}");
         }
     }
-
+}
 
     GameObject GetBlockPrefab(BlockType type)
     {
