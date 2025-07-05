@@ -15,6 +15,14 @@ public class GameManagerUI : MonoBehaviour
     public TextMeshProUGUI elapsedTimeText1;
     public TextMeshProUGUI elapsedTimeText2;
 
+    public GameObject resultPanel;
+    public RectTransform resultImage;
+    public Sprite winSprite;
+    public Sprite loseSprite;
+    public static GameManagerUI Instance;
+    void Awake() => Instance = this;
+
+
     void Start()
     {
         pauseButton.gameObject.SetActive(false);
@@ -25,7 +33,7 @@ public class GameManagerUI : MonoBehaviour
         GameManager.Instance.OnTimerUpdate += UpdateElapsedTime;
         GameManager.Instance.OnGameStateChanged += UpdateUIState;
         GameManager.Instance.OnGameEnded += OnGameEnded;
-
+        GameManager.Instance.OnGameEnded += HandleGameEnded;
     }
 
     void OnDestroy()
@@ -35,13 +43,33 @@ public class GameManagerUI : MonoBehaviour
             GameManager.Instance.OnTimerUpdate -= UpdateElapsedTime;
             GameManager.Instance.OnGameStateChanged -= UpdateUIState;
             GameManager.Instance.OnGameEnded -= OnGameEnded;
-
+            GameManager.Instance.OnGameEnded -= HandleGameEnded;
         }
     }
     void OnGameEnded(bool isWin)
     {
         playButton.gameObject.SetActive(false);
         pauseButton.gameObject.SetActive(false);
+
+        resultPanel.SetActive(true);
+        resultImage.gameObject.SetActive(true);
+        resultImage.GetComponent<Image>().sprite = isWin ? winSprite : loseSprite;
+
+        Vector3 targetPos = resultImage.position;
+        Vector3 targetScale = resultImage.localScale;
+
+        // Start từ giữa màn hình, lớn lên
+        resultImage.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
+        resultImage.localScale = Vector3.zero;
+
+        // Phóng to trước
+        resultImage.DOScale(2f, 0.8f).SetEase(Ease.OutBack).OnComplete(() =>
+        {
+            // Sau đó vừa di chuyển vừa thu nhỏ về vị trí gốc
+            Sequence seq = DOTween.Sequence();
+            seq.Append(resultImage.DOMove(targetPos, 0.6f).SetEase(Ease.InOutSine));
+            seq.Join(resultImage.DOScale(targetScale, 0.6f).SetEase(Ease.InOutSine));
+        });
     }
 
     void UpdateElapsedTime(int seconds)
@@ -151,4 +179,33 @@ public class GameManagerUI : MonoBehaviour
         GameManager.Instance.ResetGame();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+    void HandleGameEnded(bool isWin)
+    {
+        DisableAllItems();
+        
+    }
+    void DisableAllItems()
+    {
+        GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
+        foreach (GameObject item in items)
+        {
+            var dragMove = item.GetComponent<DragMove>();
+            if (dragMove != null) dragMove.enabled = false;
+
+            var dragItem = item.GetComponent<DragItem>();
+            if (dragItem != null) dragItem.enabled = false;
+
+            var col = item.GetComponent<Collider2D>();
+            if (col != null) col.enabled = false;
+
+            var sr = item.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                Color c = sr.color;
+                c.a = 0.5f;
+                sr.color = c;
+            }
+        }
+    }
+
 }
