@@ -47,7 +47,7 @@ public class DragMove : MonoBehaviour
             transform.position = worldPoint + offset;
         }
 
-        // --- LOGIC MỚI KHI THẢ CHUỘT RA ---
+        // Logic khi thả chuột ra
         if (Mouse.current.leftButton.wasReleasedThisFrame && isDragging)
         {
             isDragging = false;
@@ -59,35 +59,49 @@ public class DragMove : MonoBehaviour
 
             bool isOccupied = false;
 
-            // 1. Kiểm tra xem có Block ở đó không (dùng data map)
+            // Kiểm tra xem có Block hay Item nào ở vị trí này không
             if (MapSpawner.blockMap.ContainsKey(snappedGridPos))
             {
                 isOccupied = true;
             }
             else
             {
-                // 2. Nếu không có Block, kiểm tra xem có Item khác ở đó không (dùng vật lý)
+                // Kiểm tra xem có Item nào khác ở vị trí này không
                 Collider2D[] hits = Physics2D.OverlapCircleAll(snappedGridPos, 0.2f, itemLayerMask);
                 foreach (Collider2D hit in hits)
                 {
-                    // Nếu tìm thấy một item khác không phải là chính item đang được kéo
                     if (hit.gameObject != this.gameObject)
                     {
                         isOccupied = true;
-                        break; // Thoát vòng lặp ngay khi tìm thấy
+                        break;
                     }
                 }
             }
 
-            // Dựa vào kết quả kiểm tra để quyết định đặt xuống hay trả về
-            if (isOccupied)
+            // Kiểm tra nếu thả lên đối tượng có tag "table"
+            Collider2D tableCollider = Physics2D.OverlapPoint(transform.position);
+            if (tableCollider != null && tableCollider.CompareTag("Table"))
             {
-                // Vị trí đã có vật cản -> Trả về vị trí cũ.
+                // Nếu va chạm với "table", trả về vị trí spawn ban đầu
                 transform.position = startPosition;
                 transform.SetParent(startParent);
                 isSnapped = false;
 
-                // Nếu là cầu nối, cập nhật lại trạng thái của nó là không active
+                // Nếu là cầu nối, kiểm tra lại kết nối
+                InstantBridge bridge = GetComponent<InstantBridge>();
+                if (bridge != null)
+                {
+                    bridge.CheckConnections();
+                }
+            }
+            else if (isOccupied)
+            {
+                // Vị trí có vật cản, trả về vị trí cũ
+                transform.position = startPosition;
+                transform.SetParent(startParent);
+                isSnapped = false;
+
+                // Nếu là cầu nối, kiểm tra lại kết nối
                 InstantBridge bridge = GetComponent<InstantBridge>();
                 if (bridge != null)
                 {
@@ -96,11 +110,11 @@ public class DragMove : MonoBehaviour
             }
             else
             {
-                // Vị trí trống -> Đặt item xuống.
+                // Nếu không có vật cản, đặt item xuống
                 transform.position = (Vector3)(Vector2)snappedGridPos;
                 isSnapped = true;
 
-                // Kích hoạt kiểm tra kết nối cho cầu nối
+                // Kiểm tra lại kết nối cho cầu nối
                 InstantBridge bridge = GetComponent<InstantBridge>();
                 if (bridge != null)
                 {
