@@ -132,7 +132,7 @@ MonoBehaviour:
   detectionRadius: 0.7
   medicineLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 256
 --- !u!1 &4510839343446403663
 GameObject:
   m_ObjectHideFlags: 0

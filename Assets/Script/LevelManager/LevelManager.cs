@@ -43,7 +43,7 @@ public class LevelManager : MonoBehaviour
         MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
         if (spawner != null)
         {
-            spawner.SpawnMap();
+            spawner.SpawnMap(selectedMapIndex);
 
             // Tắt UI kết quả (win/lose) nếu có
             if (GameManagerUI.Instance != null)
@@ -67,7 +67,7 @@ public class LevelManager : MonoBehaviour
         if (spawner != null)
         {
             spawner.ResetMap();
-            spawner.SpawnMap();
+            spawner.SpawnMap(selectedMapIndex);
         }
     }
 }

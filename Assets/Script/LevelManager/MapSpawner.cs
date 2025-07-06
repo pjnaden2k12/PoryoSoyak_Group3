@@ -46,11 +46,14 @@ public class MapSpawner : MonoBehaviour
         }
 
         currentMapData = mapList.allMaps[mapIndex];
+
+        // Truyền thời gian giới hạn vào GameManager
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.SetCurrentMap(mapIndex);
+            GameManager.Instance.SetCurrentMap(mapIndex);  // Điều này đã bao gồm cả việc thiết lập thời gian
         }
-        // Thực hiện spawn
+
+        // Thực hiện spawn các đối tượng
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
@@ -59,6 +62,7 @@ public class MapSpawner : MonoBehaviour
         // Gửi thông báo rằng map đã được spawn xong
         OnMapSpawned?.Invoke();
     }
+
 
     // Hàm public để LevelManager gọi khi cần reset
     public void ResetMap()

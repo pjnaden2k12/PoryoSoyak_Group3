@@ -2,11 +2,13 @@
 
 public class GameManager : MonoBehaviour
 {
-    public GameMapList mapList; // Danh sách map
+    public GameMapList mapList;
 
     private MapData currentMapData;
     private float elapsedTime = 0f;
     private bool isGamePlaying = false;
+
+    private float requiredTime;
 
     public static GameManager Instance;
 
@@ -19,7 +21,7 @@ public class GameManager : MonoBehaviour
     public delegate void GameResult(bool isWin);
     public event GameResult OnGameEnded;
 
-    public float RequiredTime => currentMapData != null ? currentMapData.playTimeLimit : 0f;
+    public float RequiredTime => requiredTime;
 
     void Awake()
     {
@@ -35,8 +37,15 @@ public class GameManager : MonoBehaviour
             currentMapData = null;
             return;
         }
+
         currentMapData = mapList.allMaps[mapIndex];
+        SetPlayTimeLimit(currentMapData.playTimeLimit);
         ResetTimer();
+    }
+
+    public void SetPlayTimeLimit(float limit)
+    {
+        requiredTime = limit;
     }
 
     void Update()
@@ -45,8 +54,8 @@ public class GameManager : MonoBehaviour
 
         elapsedTime += Time.deltaTime;
 
-        if (elapsedTime > RequiredTime)
-            elapsedTime = RequiredTime;
+        if (elapsedTime > requiredTime)
+            elapsedTime = requiredTime;
 
         int seconds = Mathf.FloorToInt(elapsedTime);
         OnTimerUpdate?.Invoke(seconds);
@@ -57,7 +66,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (elapsedTime >= RequiredTime)
+        if (elapsedTime >= requiredTime)
         {
             if (AreAnyMedicineTagsPresent())
                 LoseGame();
