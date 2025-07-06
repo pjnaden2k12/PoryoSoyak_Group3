@@ -10,13 +10,21 @@ public class DragMove : MonoBehaviour
     public bool isSnapped = false;
     private Transform startParent;
     private LayerMask itemLayerMask;
+    private LayerMask blockLayerMask;
 
     void Start()
     {
         cam = Camera.main;
         startPosition = transform.position;
         startParent = transform.parent;
-        itemLayerMask = LayerMask.GetMask("ItemLayer"); // Lấy LayerMask cho Item
+        itemLayerMask = LayerMask.GetMask("ItemLayer");
+        blockLayerMask = LayerMask.GetMask("BlockLayer");
+    }
+    public void SetStartPosition(Vector3 pos, Transform parent = null)
+    {
+        startPosition = pos;
+        startParent = parent ?? transform.parent;
+        transform.position = pos;
     }
 
     void Update()
@@ -110,17 +118,36 @@ public class DragMove : MonoBehaviour
             }
             else
             {
-                // Nếu không có vật cản, đặt item xuống
-                transform.position = (Vector3)(Vector2)snappedGridPos;
-                isSnapped = true;
-
-                // Kiểm tra lại kết nối cho cầu nối
-                InstantBridge bridge = GetComponent<InstantBridge>();
-                if (bridge != null)
+                // Kiểm tra nếu gần ít nhất một Block (BlockLayer)
+                Collider2D[] nearbyBlocks = Physics2D.OverlapCircleAll(snappedGridPos, 1.0f, blockLayerMask);
+                if (nearbyBlocks.Length > 0)
                 {
-                    bridge.CheckConnections();
+                    transform.position = (Vector3)(Vector2)snappedGridPos;
+                    transform.SetParent(startParent);  // <-- Gán lại parent
+                    isSnapped = true;
+
+
+                    InstantBridge bridge = GetComponent<InstantBridge>();
+                    if (bridge != null)
+                    {
+                        bridge.CheckConnections();
+                    }
+                }
+                else
+                {
+                    // Không gần block nào, trả về vị trí cũ
+                    transform.position = startPosition;
+                    transform.SetParent(startParent);
+                    isSnapped = false;
+
+                    InstantBridge bridge = GetComponent<InstantBridge>();
+                    if (bridge != null)
+                    {
+                        bridge.CheckConnections();
+                    }
                 }
             }
+
         }
     }
 }

@@ -66,8 +66,15 @@ public class LevelManager : MonoBehaviour
         MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
         if (spawner != null)
         {
-            spawner.ResetMap();
-            spawner.SpawnMap(selectedMapIndex);
+            StartCoroutine(ResetAndSpawn(spawner));
+
         }
     }
+    private System.Collections.IEnumerator ResetAndSpawn(MapSpawner spawner)
+    {
+        spawner.ResetMap();
+        yield return null; // đợi 1 frame để đảm bảo Destroy() hoàn tất
+        spawner.SpawnMap(selectedMapIndex);
+    }
+
 }

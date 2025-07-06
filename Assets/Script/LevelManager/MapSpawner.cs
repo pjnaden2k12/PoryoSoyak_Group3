@@ -150,14 +150,29 @@ public class MapSpawner : MonoBehaviour
     void SpawnItems()
     {
         if (currentMapData.items == null) return;
+
         foreach (var item in currentMapData.items)
         {
             if (item.typeIndex < itemPrefabs.Length)
             {
-                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
+                GameObject obj = Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
+
+                DragItem drag = obj.GetComponent<DragItem>();
+                if (drag != null)
+                {
+                    drag.SetStartPosition(item.position);
+                }
+
+                DragMove drag1 = obj.GetComponent<DragMove>();
+                if (drag1 != null)  // <-- đúng check cho drag1
+                {
+                    drag1.SetStartPosition(item.position, transform);
+                }
+
             }
         }
     }
+
 
     private GameObject GetBlockPrefab(BlockType type)
     {
