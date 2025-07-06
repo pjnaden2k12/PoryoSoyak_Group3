@@ -2,7 +2,7 @@
 using UnityEngine.UI;
 using DG.Tweening;
 
-public class UiManager : MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     public GameObject HomePanel;
     public GameObject HelpPanel;
@@ -108,7 +108,6 @@ public class UiManager : MonoBehaviour
         UpdateLevelButtons();
     }
 
-    // Gọi khi người chơi bấm nút level
     public void OnLevelButtonClicked(int levelIndex)
     {
         // Gán level được chọn
@@ -120,8 +119,14 @@ public class UiManager : MonoBehaviour
             levels[i].SetActive(i == levelIndex);
         }
 
+        // Gọi MapSpawner để spawn map theo dữ liệu
+        LevelManager.Instance.LoadLevel();
+
+        // Ẩn UI chọn level
         HidePanel(selectGroup);
-        // Nếu bạn có panel game play có thể Show panel đó ở đây
+
+        // Nếu bạn có UI gameplay, bạn có thể hiện nó tại đây
+        // ShowPanel(gameplayGroup); <-- ví dụ nếu bạn có
     }
 
     // Cập nhật trạng thái các nút level (mở khóa hoặc khóa)
@@ -138,19 +143,21 @@ public class UiManager : MonoBehaviour
                 if (int.TryParse(name.Substring("LevelButton_".Length), out levelIndex))
                 {
                     bool unlocked = levelIndex == 0 || LevelManager.Instance.IsLevelCompleted(levelIndex - 1);
+
                     btn.interactable = unlocked;
 
                     Transform lockIcon = btn.transform.Find("LockIcon");
-                    if (lockIcon != null)
-                    {
-                        lockIcon.gameObject.SetActive(!unlocked);
-                    }
+                    Transform levelIcon = btn.transform.Find("LevelIcon");
+
+                    if (lockIcon != null) lockIcon.gameObject.SetActive(!unlocked);
+                    if (levelIcon != null) levelIcon.gameObject.SetActive(unlocked);
 
                     btn.onClick.RemoveAllListeners();
-                    int capturedIndex = levelIndex; // capture biến để dùng đúng trong lambda
+                    int capturedIndex = levelIndex;
                     btn.onClick.AddListener(() => OnLevelButtonClicked(capturedIndex));
                 }
             }
         }
     }
+
 }

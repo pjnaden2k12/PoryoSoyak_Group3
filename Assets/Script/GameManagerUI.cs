@@ -21,12 +21,17 @@ public class GameManagerUI : MonoBehaviour
     public Sprite winSprite;
     public Sprite loseSprite;
     public static GameManagerUI Instance;
+    public GameObject gameUI;
     void Awake() => Instance = this;
 
 
     void Start()
     {
         pauseButton.gameObject.SetActive(false);
+
+        // Ẩn trước
+        if (gameUI != null)
+            gameUI.SetActive(false);
 
         SetTwoDigitText(requiredTimeText1, requiredTimeText2, Mathf.CeilToInt(GameManager.Instance.requiredTime));
         SetTwoDigitText(elapsedTimeText1, elapsedTimeText2, 0);
@@ -185,7 +190,7 @@ public class GameManagerUI : MonoBehaviour
     void HandleGameEnded(bool isWin)
     {
         DisableAllItems();
-        
+
     }
     void DisableAllItems()
     {
@@ -210,19 +215,28 @@ public class GameManagerUI : MonoBehaviour
             }
         }
     }
-    public void OnHomeButtonPressed()
+    void OnEnable()
     {
-        DOTween.KillAll();
-        MedicineAutoMove.isPlayPressed = false;
-        GameManager.Instance.ResetGame();
+        MapSpawner.OnMapSpawned += ShowGameUI;
+    }
 
-        var mapSpawner = FindFirstObjectByType<MapSpawner>();
-        if (mapSpawner != null)
+    void OnDisable()
+    {
+        MapSpawner.OnMapSpawned -= ShowGameUI;
+    }
+
+    void ShowGameUI()
+    {
+        if (gameUI != null)
         {
-            Destroy(mapSpawner.gameObject);
-        }
+            gameUI.SetActive(true);
 
-        // load về panel home
+            // Optional: hiệu ứng hiện lên
+            CanvasGroup cg = gameUI.GetComponent<CanvasGroup>();
+            if (cg == null) cg = gameUI.AddComponent<CanvasGroup>();
+            cg.alpha = 0;
+            cg.DOFade(1, 0.5f);
+        }
     }
 
 }

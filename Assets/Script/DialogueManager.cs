@@ -15,41 +15,29 @@ public class DialogueManager : MonoBehaviour
         public string dialogueText;
         public bool isLeftSide;
     }
-    public GameObject storyUI;
-    public GameObject gameUI;
-    [Header("Dialogue Data")]
+
     public DialogueLine[] lines;
 
-    [Header("UI Elements")]
     public Image leftImage;
     public Image rightImage;
     public TextMeshProUGUI dialogueText;
     public Button nextButton;
-
-    [Header("Fade UI")]
-    public Image blackOverlay; // 🟥 Kéo Image đen vào đây
+    public Image blackOverlay;
 
     private int currentLine = 0;
     private bool isTyping = false;
     private Coroutine typingCoroutine;
 
+    public System.Action OnStoryFinished; // callback cho GameManagerUI
+
     void Start()
     {
         currentLine = 0;
-
-        // Hiện blackOverlay và ẩn gameUI lúc đầu
-        if (blackOverlay != null)
-            blackOverlay.gameObject.SetActive(true);
-
-        if (gameUI != null)
-            gameUI.SetActive(false);
-
-        blackOverlay.color = new Color(0, 0, 0, 1); // Full đen
-        blackOverlay.DOFade(0, 1f).OnComplete(() =>
-        {
-            ShowDialogueLine();
-        });
+        if (blackOverlay != null) blackOverlay.gameObject.SetActive(true);
+        blackOverlay.color = new Color(0, 0, 0, 1);
+        blackOverlay.DOFade(0, 1f).OnComplete(() => { ShowDialogueLine(); });
     }
+
     public void OnNextClicked()
     {
         if (isTyping)
@@ -91,43 +79,28 @@ public class DialogueManager : MonoBehaviour
     {
         isTyping = true;
         dialogueText.text = "";
-
         foreach (char c in text)
         {
             dialogueText.text += c;
             yield return new WaitForSeconds(0.03f);
         }
-
         isTyping = false;
     }
 
     IEnumerator FadeToEnd()
     {
         nextButton.interactable = false;
-
         Sequence shrink = DOTween.Sequence();
         shrink.Join(leftImage.transform.DOScale(Vector3.zero, 0.5f));
         shrink.Join(rightImage.transform.DOScale(Vector3.zero, 0.5f));
         yield return shrink.WaitForCompletion();
-
         yield return blackOverlay.DOFade(1, 1f).WaitForCompletion();
 
-        if (storyUI != null)
-        {
-            foreach (Transform child in storyUI.transform)
-            {
-                child.gameObject.SetActive(false);
-            }
-        }
-
-        // Hiện lại gameUI sau khi màn hình đen hoàn tất
-        if (gameUI != null)
-        {
-            gameUI.SetActive(true);
-        }
-
         gameObject.SetActive(false);
+
+        OnStoryFinished?.Invoke(); // Gọi sự kiện thông báo story xong
     }
+
     void SetAlpha(Image img, float a)
     {
         Color c = img.color;

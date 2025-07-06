@@ -6,7 +6,7 @@ public class MapData : ScriptableObject
     public BlockEntry[] blocks;
     public SpawnEntry[] players;
     public SpawnEntry[] items;
-    public float playTimeLimit = 60f;
+    public float playTimeLimit;
 }
 
 [System.Serializable]

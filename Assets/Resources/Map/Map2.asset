@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a47bc7ad2be87448af44765eaad2bfd, type: 3}
-  m_Name: Map1
+  m_Name: Map2
   m_EditorClassIdentifier: 
   blocks:
   - id: 0
@@ -65,13 +65,13 @@ MonoBehaviour:
     position: {x: 1, y: -3}
     type: 3
     hasNoBlock: 0
-    hasMedicine: 0
+    hasMedicine: 1
     medicineTypeIndices: 0
   - id: 9
     position: {x: 0, y: -3}
     type: 4
     hasNoBlock: 0
-    hasMedicine: 1
+    hasMedicine: 0
     medicineTypeIndices: 0
   - id: 10
     position: {x: 0, y: -2}
@@ -95,4 +95,4 @@ MonoBehaviour:
     typeIndex: 1
   - position: {x: 7.4, y: -1.7}
     typeIndex: 2
-  playTimeLimit: 7
+  playTimeLimit: 6

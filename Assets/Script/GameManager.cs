@@ -2,7 +2,7 @@
 
 public class GameManager : MonoBehaviour
 {
-    public float requiredTime = 60f;
+    public float requiredTime;
 
     private float elapsedTime = 0f;
     private bool isGamePlaying = false;

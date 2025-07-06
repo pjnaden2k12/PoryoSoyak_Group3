@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
@@ -52,4 +52,18 @@ public class LevelManager : MonoBehaviour
 
         spawner.SpawnMap();
     }
+    public void ResetLevel()
+    {
+        MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
+        if (spawner != null)
+        {
+            spawner.ResetMap();  // Bạn cần thêm hàm ResetMap() trong MapSpawner
+            spawner.SpawnMap();
+        }
+        else
+        {
+            Debug.LogError("MapSpawner not found in scene.");
+        }
+    }
+
 }
