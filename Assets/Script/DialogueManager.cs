@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -22,10 +23,13 @@ public class DialogueManager : MonoBehaviour
     public Image leftImage;
     public Image rightImage;
     public TextMeshProUGUI dialogueText;
-    public GameObject nextButton;
+    public Button nextButton;
+
+    [Header("Fade UI")]
+    public Image blackOverlay; // 🟥 Kéo Image đen vào đây
 
     [Header("After Dialogue")]
-    public GameObject gameplayPrefab; // Kéo Prefab màn chơi vào đây
+    public GameObject gameplayPrefab;
 
     private int currentLine = 0;
     private bool isTyping = false;
@@ -33,13 +37,21 @@ public class DialogueManager : MonoBehaviour
 
     void Start()
     {
+        // Reset trạng thái
+        leftImage.transform.localScale = Vector3.one;
+        rightImage.transform.localScale = Vector3.one;
         currentLine = 0;
-        ShowDialogueLine();
+
+        // Mờ màn hình đen → rồi hiện hội thoại
+        blackOverlay.color = new Color(0, 0, 0, 1); // Full đen
+        blackOverlay.DOFade(0, 1f).OnComplete(() =>
+        {
+            ShowDialogueLine();
+        });
     }
 
     public void OnNextClicked()
     {
-        // Nếu đang gõ thì bỏ qua và hiện toàn bộ dòng luôn
         if (isTyping)
         {
             StopCoroutine(typingCoroutine);
@@ -48,7 +60,6 @@ public class DialogueManager : MonoBehaviour
             return;
         }
 
-        // Nếu chưa hết thoại thì chuyển sang dòng tiếp
         currentLine++;
         if (currentLine < lines.Length)
         {
@@ -56,7 +67,7 @@ public class DialogueManager : MonoBehaviour
         }
         else
         {
-            EndDialogue();
+            StartCoroutine(FadeToEnd());
         }
     }
 
@@ -64,61 +75,68 @@ public class DialogueManager : MonoBehaviour
     {
         DialogueLine line = lines[currentLine];
 
-        // Bật cả 2 ảnh
         leftImage.gameObject.SetActive(true);
         rightImage.gameObject.SetActive(true);
 
-        // Gán ảnh cho cả 2 bên
-        leftImage.sprite = (lines.Length > currentLine) ? lines[0].speakerImage : null;
-        rightImage.sprite = (lines.Length > currentLine) ? lines[1].speakerImage : null;
+        leftImage.sprite = line.isLeftSide ? line.speakerImage : GetOtherSprite(line.speakerImage);
+        rightImage.sprite = line.isLeftSide ? GetOtherSprite(line.speakerImage) : line.speakerImage;
 
-        // Gán ảnh cho đúng nhân vật nói
-        if (line.isLeftSide)
-        {
-            leftImage.sprite = line.speakerImage;
-        }
-        else
-        {
-            rightImage.sprite = line.speakerImage;
-        }
-
-        // Làm mờ bên không nói
-        if (line.isLeftSide)
-        {
-            leftImage.color = new Color(1f, 1f, 1f, 1f); // ảnh rõ
-            rightImage.color = new Color(1f, 1f, 1f, 0.4f); // mờ
-        }
-        else
-        {
-            rightImage.color = new Color(1f, 1f, 1f, 1f);
-            leftImage.color = new Color(1f, 1f, 1f, 0.4f);
-        }
+        SetAlpha(leftImage, line.isLeftSide ? 1f : 0.3f);
+        SetAlpha(rightImage, line.isLeftSide ? 0.3f : 1f);
 
         typingCoroutine = StartCoroutine(TypeLine(line.dialogueText));
     }
-
 
     IEnumerator TypeLine(string text)
     {
         isTyping = true;
         dialogueText.text = "";
 
-        foreach (char letter in text)
+        foreach (char c in text)
         {
-            dialogueText.text += letter;
+            dialogueText.text += c;
             yield return new WaitForSeconds(0.03f);
         }
 
         isTyping = false;
     }
 
-    void EndDialogue()
+    IEnumerator FadeToEnd()
     {
-        gameObject.SetActive(false); // Ẩn khung hội thoại
+        nextButton.interactable = false;
 
-        if (gameplayPrefab != null)
+        // Thu nhỏ nhân vật
+        Sequence shrink = DOTween.Sequence();
+        shrink.Join(leftImage.transform.DOScale(Vector3.zero, 0.5f));
+        shrink.Join(rightImage.transform.DOScale(Vector3.zero, 0.5f));
+        yield return shrink.WaitForCompletion();
+
+        // Tối màn hình lại
+        blackOverlay.DOFade(1, 1f).OnComplete(() =>
         {
-            Instantiate(gameplayPrefab, Vector3.zero, Quaternion.identity);
+            gameObject.SetActive(false);
+
+            if (gameplayPrefab != null)
+            {
+                Instantiate(gameplayPrefab, Vector3.zero, Quaternion.identity);
+            }
+        });
+    }
+
+    void SetAlpha(Image img, float a)
+    {
+        Color c = img.color;
+        c.a = a;
+        img.color = c;
+    }
+
+    Sprite GetOtherSprite(Sprite current)
+    {
+        foreach (var l in lines)
+        {
+            if (l.speakerImage != current)
+                return l.speakerImage;
         }
+        return null;
     }
 }
