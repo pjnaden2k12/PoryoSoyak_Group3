@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using DG.Tweening;
+using System.Collections.Generic;
 
 public class MedicineAutoMove : MonoBehaviour
 {
@@ -7,128 +8,98 @@ public class MedicineAutoMove : MonoBehaviour
     public float moveDuration = 0.3f;
     private bool isMoving = false;
 
-    private int maxId = 0;
-    private int blockLayerMask;
+    private LayerMask itemLayerMask;
     public static bool isPlayPressed = false;
 
     public int currentTypeIndex = 0;
     public Sprite[] medicineSprites;
     public SpriteRenderer spriteRenderer;
-    private int itemLayerMask;
+
     void Start()
     {
-        blockLayerMask = LayerMask.GetMask("BlockLayer");
         itemLayerMask = LayerMask.GetMask("ItemLayer");
-
-        BlockID[] allBlocks = Object.FindObjectsByType<BlockID>(FindObjectsSortMode.None);
-        maxId = 0;
-        foreach (var block in allBlocks)
-        {
-            if (block.id > maxId)
-                maxId = block.id;
-        }
-        maxId += 1;
-
         UpdateAppearance();
     }
 
     void Update()
     {
-        if (!isPlayPressed) return;
-
-        if (!isMoving)
-            TryMoveToNextBlock();
+        if (!isPlayPressed || isMoving) return;
+        TryMoveToNextBlock();
     }
 
     void TryMoveToNextBlock()
     {
-        int currentId = -1;
+        isMoving = true;
+        Vector2Int currentGridPos = new Vector2Int(Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y));
 
-        Collider2D currentBlock = Physics2D.OverlapCircle(transform.position, 0.1f, blockLayerMask);
-        if (currentBlock != null && currentBlock.CompareTag("Block"))
+        if (MapSpawner.blockMap.TryGetValue(currentGridPos, out BlockID currentBlockID))
         {
-            BlockID blockIDComponent = currentBlock.GetComponent<BlockID>();
-            if (blockIDComponent != null)
-                currentId = blockIDComponent.id;
-        }
+            Vector2 moveDirection = currentBlockID.exitDirection;
+            Vector2 targetPosition = (Vector2)transform.position + moveDirection;
 
-        if (currentId == -1)
-        {
-            Debug.LogWarning("Medicine not on a valid block.");
-            return;
-        }
+            // Quét tất cả các item có thể có ở ô đích
+            Collider2D[] hits = Physics2D.OverlapCircleAll(targetPosition, 0.2f, itemLayerMask);
 
-        int nextId = (currentId + 1) % maxId;
-
-        BlockID[] allBlocks = Object.FindObjectsByType<BlockID>(FindObjectsSortMode.None);
-
-        BlockID closestBlock = null;
-        float closestDistance = float.MaxValue;
-
-        foreach (var block in allBlocks)
-        {
-            if (block.id == nextId)
+            // ƯU TIÊN 1: KIỂM TRA TRẠM TRUNG CHUYỂN (FULLMOVE)
+            foreach (var hit in hits)
             {
-                float distance = Vector3.Distance(transform.position, block.transform.position);
-                if (distance < closestDistance)
+                if (hit.GetComponent<CrossroadsJunction>() != null)
                 {
-                    closestDistance = distance;
-                    closestBlock = block;
+                    // Tìm thấy trạm trung chuyển -> Thực hiện bước nhảy 2 ô
+                    Vector3 finalDestination = transform.position + ((Vector3)moveDirection * 2);
+                    MoveToTarget(finalDestination, moveDuration * 1.5f);
+                    return;
                 }
             }
-        }
 
-        if (closestBlock != null)
-        {
-            MoveToBlock(closestBlock.transform.position);
+            // ƯU TIÊN 2: KIỂM TRA CẦU NỐI MỘT CHIỀU (INSTANTBRIDGE)
+            foreach (InstantBridge bridge in InstantBridge.ActiveBridges)
+            {
+                if (bridge.entryBlock == currentBlockID.transform)
+                {
+                    // Tìm thấy cầu nối được kết nối -> Dịch chuyển
+                    MoveToTarget(bridge.exitBlock.position);
+                    return;
+                }
+            }
+
+            // ƯU TIÊN 3: DI CHUYỂN BÌNH THƯỜNG
+            MoveToTarget(transform.position + (Vector3)moveDirection);
         }
         else
         {
-            Debug.LogWarning($"No block found with ID {nextId}");
+            isMoving = false;
         }
     }
 
-    void MoveToBlock(Vector3 destination)
+    void MoveToTarget(Vector3 destination, float duration)
     {
-        isMoving = true;
-
-        transform.DOMove(destination, moveDuration)
-            .SetEase(Ease.InOutSine)
+        transform.DOMove(destination, duration)
+            .SetEase(Ease.Linear)
             .OnComplete(() =>
             {
                 CheckForItem();
-
-                DOVirtual.DelayedCall(moveDelay, () =>
-                {
-                    isMoving = false;
-                });
+                DOVirtual.DelayedCall(moveDelay, () => isMoving = false);
             });
+    }
+
+    void MoveToTarget(Vector3 destination)
+    {
+        MoveToTarget(destination, moveDuration);
     }
 
     void CheckForItem()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.1f);
-        
-
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.1f, itemLayerMask);
         foreach (var hit in hits)
         {
-           
-
-            if (hit.CompareTag("Item"))
+            ItemType itemType = hit.GetComponent<ItemType>();
+            if (itemType != null && hit.GetComponent<InstantBridge>() == null && hit.GetComponent<CrossroadsJunction>() == null)
             {
-                ItemType itemType = hit.GetComponent<ItemType>();
-                if (itemType != null)
+                if (itemType.typeIndex != currentTypeIndex)
                 {
-                    if (itemType.typeIndex != currentTypeIndex)
-                    {
-                        currentTypeIndex = itemType.typeIndex;
-                        Debug.Log($"Changed type to {currentTypeIndex}");
-                        UpdateAppearance();
-                    }
-                }
-                else
-                {
-                    Debug.LogWarning("No ItemType found on item.");
+                    currentTypeIndex = itemType.typeIndex;
+                    UpdateAppearance();
                 }
             }
         }
@@ -136,28 +107,17 @@ public class MedicineAutoMove : MonoBehaviour
 
     void UpdateAppearance()
     {
-        if (spriteRenderer == null || currentTypeIndex < 0 || currentTypeIndex >= medicineSprites.Length)
-            return;
-
-        // Scale nhỏ lại
-        transform.DOScale(Vector3.zero, 0.15f).SetEase(Ease.InBack).OnComplete(() =>
+        if (spriteRenderer == null || currentTypeIndex < 0 || currentTypeIndex >= medicineSprites.Length) return;
+        transform.DOScale(0.8f, 0.15f).SetEase(Ease.OutQuad).OnComplete(() =>
         {
-            // Đổi sprite và tag
             spriteRenderer.sprite = medicineSprites[currentTypeIndex];
-
             switch (currentTypeIndex)
             {
                 case 0: tag = "mdCircle"; break;
                 case 1: tag = "mdSquare"; break;
                 case 2: tag = "mdTriangle"; break;
             }
-
-           
-
-            // Scale to full size
-            transform.DOScale(Vector3.one, 0.15f).SetEase(Ease.OutBack);
+            transform.DOScale(1f, 0.15f).SetEase(Ease.InQuad);
         });
     }
-
-
 }

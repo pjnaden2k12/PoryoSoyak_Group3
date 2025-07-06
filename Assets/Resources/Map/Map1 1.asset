@@ -1,0 +1,87 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a47bc7ad2be87448af44765eaad2bfd, type: 3}
+  m_Name: Map1 1
+  m_EditorClassIdentifier: 
+  blocks:
+  - id: 0
+    position: {x: 0, y: 0}
+    type: 0
+    hasNoBlock: 1
+    exitDirection: {x: 1, y: 0}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 1
+    position: {x: 1, y: 0}
+    type: 3
+    hasNoBlock: 0
+    exitDirection: {x: 1, y: 0}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 2
+    position: {x: 2, y: 0}
+    type: 1
+    hasNoBlock: 0
+    exitDirection: {x: 0, y: -1}
+    hasMedicine: 1
+    medicineTypeIndices: 00000000
+  - id: 3
+    position: {x: 2, y: -1}
+    type: 2
+    hasNoBlock: 0
+    exitDirection: {x: 0, y: -1}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 4
+    position: {x: 2, y: -2}
+    type: 5
+    hasNoBlock: 0
+    exitDirection: {x: -1, y: 0}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 5
+    position: {x: 1, y: -2}
+    type: 3
+    hasNoBlock: 0
+    exitDirection: {x: -1, y: 0}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 6
+    position: {x: 0, y: -2}
+    type: 4
+    hasNoBlock: 0
+    exitDirection: {x: 0, y: 1}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  - id: 7
+    position: {x: 0, y: -1}
+    type: 2
+    hasNoBlock: 0
+    exitDirection: {x: 0, y: 1}
+    hasMedicine: 0
+    medicineTypeIndices: 
+  players: []
+  items:
+  - position: {x: 7.4, y: 0.3}
+    typeIndex: 0
+  - position: {x: 7.4, y: -0.7}
+    typeIndex: 1
+  - position: {x: 7.4, y: -1.7}
+    typeIndex: 2
+  - position: {x: 8.4, y: 0.31}
+    typeIndex: 3
+  - position: {x: 8.4, y: -0.7}
+    typeIndex: 4
+  - position: {x: 8.4, y: -1.7}
+    typeIndex: 5
+  - position: {x: 9.4, y: -0.7}
+    typeIndex: 6

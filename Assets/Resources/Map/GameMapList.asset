@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: GameMapList
   m_EditorClassIdentifier: 
   allMaps:
-  - {fileID: 11400000, guid: fc740fa9530bee64988f76b42516cd6f, type: 2}
+  - {fileID: 11400000, guid: cea809c9eaefb294f881a5bde6b4bd98, type: 2}

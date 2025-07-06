@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3657826470764969728}
   - component: {fileID: 5767756948210578477}
   - component: {fileID: 1956781702074110348}
-  m_Layer: 6
+  m_Layer: 7
   m_Name: ItemMoveUp
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -101,6 +101,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fc7f7f979ac410469b4c69c1a734366, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSnapped: 0
 --- !u!61 &1956781702074110348
 BoxCollider2D:
   m_ObjectHideFlags: 0

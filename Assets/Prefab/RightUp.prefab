@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 43856739276424944}
   - component: {fileID: 3603306497481602323}
   - component: {fileID: 5296682326184932549}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: RightUp
   m_TagString: Block
   m_Icon: {fileID: 0}
@@ -148,3 +148,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 3
+  exitDirection: {x: 0, y: 0}

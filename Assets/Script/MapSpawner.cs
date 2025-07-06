@@ -20,6 +20,8 @@ public class MapSpawner : MonoBehaviour
 
     [Header("Player Prefabs")]
     public GameObject[] playerPrefabs;
+    [Header("Teleporter Prefabs")]
+    public GameObject[] teleporterPrefabs;
 
     [Header("Item Prefabs")]
     public GameObject[] itemPrefabs;
@@ -28,7 +30,12 @@ public class MapSpawner : MonoBehaviour
     public GameObject[] medicinePrefabs;
 
     private Dictionary<int, Transform> spawnedBlocksById = new();
+    public static Dictionary<Vector2Int, BlockID> blockMap = new();
 
+    private void Awake()
+    {
+        blockMap.Clear();
+    }
     void Start()
     {
         if (mapList == null || selectedMapIndex < 0 || selectedMapIndex >= mapList.allMaps.Length)
@@ -43,7 +50,9 @@ public class MapSpawner : MonoBehaviour
         SpawnPlayers();
         SpawnItems();
         SpawnMedicines();
+       
     }
+  
     void SpawnBlocks()
     {
         foreach (var data in mapData.blocks)
@@ -57,7 +66,10 @@ public class MapSpawner : MonoBehaviour
 
             BlockID blockID = block.GetComponent<BlockID>();
             if (blockID != null)
+            {
                 blockID.id = data.id;
+                blockID.exitDirection = data.exitDirection;
+            }
 
             if (data.hasNoBlock && noBlockChildPrefab != null)
             {
@@ -69,6 +81,11 @@ public class MapSpawner : MonoBehaviour
             spawnedBlocksById[data.id] = block.transform;
             Vector2Int posInt = new Vector2Int(Mathf.RoundToInt(data.position.x), Mathf.RoundToInt(data.position.y));
             BlockPositionManager.blockPositions.Add(posInt);
+          
+            if (blockID != null && !blockMap.ContainsKey(posInt))
+            {
+                blockMap.Add(posInt, blockID);
+            }
         }
     }
 

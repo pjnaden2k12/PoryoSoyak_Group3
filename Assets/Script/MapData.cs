@@ -6,7 +6,8 @@ public class MapData : ScriptableObject
     public BlockEntry[] blocks;
     public SpawnEntry[] players;
     public SpawnEntry[] items;
-  
+
+
 }
 
 [System.Serializable]
@@ -16,6 +17,7 @@ public struct BlockEntry
     public Vector2 position;
     public BlockType type;
     public bool hasNoBlock;
+    public Vector2 exitDirection;
 
     public bool hasMedicine;
     public int[] medicineTypeIndices; // Danh sách các loại medicine (theo index prefab) gắn vào block này
