@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3356979571874480836}
   - component: {fileID: 5176147924856925042}
   - component: {fileID: 5869222492946230264}
-  m_Layer: 7
+  m_Layer: 6
   m_Name: Horizontal
   m_TagString: Block
   m_Icon: {fileID: 0}
@@ -148,3 +148,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   id: 8
+  exitDirection: {x: 0, y: 0}
