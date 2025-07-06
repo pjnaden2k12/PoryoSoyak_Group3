@@ -52,7 +52,14 @@ public class LevelManager : MonoBehaviour
             }
         }
     }
-
+    public void DestroyMap()
+    {
+        MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
+        if (spawner != null)
+        {
+            spawner.ResetMap();  // Xóa tất cả các đối tượng hiện tại của bản đồ
+        }
+    }
 
     public void ResetLevel()
     {
