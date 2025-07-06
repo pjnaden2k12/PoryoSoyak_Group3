@@ -16,6 +16,7 @@ public class DialogueManager : MonoBehaviour
         public bool isLeftSide;
     }
     public GameObject storyUI;
+    public GameObject gameUI;
     [Header("Dialogue Data")]
     public DialogueLine[] lines;
 
@@ -34,17 +35,21 @@ public class DialogueManager : MonoBehaviour
 
     void Start()
     {
-        
         currentLine = 0;
 
-        // Mờ màn hình đen → rồi hiện hội thoại
+        // Hiện blackOverlay và ẩn gameUI lúc đầu
+        if (blackOverlay != null)
+            blackOverlay.gameObject.SetActive(true);
+
+        if (gameUI != null)
+            gameUI.SetActive(false);
+
         blackOverlay.color = new Color(0, 0, 0, 1); // Full đen
         blackOverlay.DOFade(0, 1f).OnComplete(() =>
         {
             ShowDialogueLine();
         });
     }
-
     public void OnNextClicked()
     {
         if (isTyping)
@@ -109,16 +114,20 @@ public class DialogueManager : MonoBehaviour
 
         if (storyUI != null)
         {
-            // Tắt tất cả object con trong storyUI
             foreach (Transform child in storyUI.transform)
             {
                 child.gameObject.SetActive(false);
             }
         }
 
+        // Hiện lại gameUI sau khi màn hình đen hoàn tất
+        if (gameUI != null)
+        {
+            gameUI.SetActive(true);
+        }
+
         gameObject.SetActive(false);
     }
-
     void SetAlpha(Image img, float a)
     {
         Color c = img.color;
