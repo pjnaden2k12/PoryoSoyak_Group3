@@ -25,10 +25,7 @@ public class LevelManager : MonoBehaviour
         selectedMapIndex = index;
     }
 
-    public void LoadLevelScene(string sceneName)
-    {
-        SceneManager.LoadScene(sceneName);
-    }
+   
 
     public void CompleteLevel()
     {
