@@ -21,6 +21,8 @@ public class UiManager : MonoBehaviour
     [Header("Levels trong scene (bật/tắt theo chọn)")]
     public GameObject[] levels;
 
+    private int currentLevelIndex = -1;
+
     private void Start()
     {
         homeGroup = SetupCanvasGroup(HomePanel);
@@ -108,22 +110,6 @@ public class UiManager : MonoBehaviour
         UpdateLevelButtons();
     }
 
-    // Gọi khi người chơi bấm nút level
-    public void OnLevelButtonClicked(int levelIndex)
-    {
-        // Gán level được chọn
-        LevelManager.Instance.SetSelectedMapIndex(levelIndex);
-
-        // Bật level tương ứng, tắt level khác
-        for (int i = 0; i < levels.Length; i++)
-        {
-            levels[i].SetActive(i == levelIndex);
-        }
-
-        HidePanel(selectGroup);
-        // Nếu bạn có panel game play có thể Show panel đó ở đây
-    }
-
     // Cập nhật trạng thái các nút level (mở khóa hoặc khóa)
     public void UpdateLevelButtons()
     {
@@ -137,20 +123,58 @@ public class UiManager : MonoBehaviour
                 int levelIndex;
                 if (int.TryParse(name.Substring("LevelButton_".Length), out levelIndex))
                 {
-                    bool unlocked = levelIndex == 0 || LevelManager.Instance.IsLevelCompleted(levelIndex - 1);
+                    // Level 0 luôn mở khóa, level tiếp theo mở khi level trước hoàn thành
+                    bool unlocked = levelIndex == 0 || PlayerPrefs.GetInt("LevelCompleted_" + (levelIndex - 1), 0) == 1;
+
                     btn.interactable = unlocked;
 
-                    Transform lockIcon = btn.transform.Find("LockIcon");
+                    // Tìm icon lock (con của nút)
+                    Transform lockIcon = btn.transform.Find("Lock");
                     if (lockIcon != null)
                     {
+                        // Ẩn icon lock nếu mở khóa, hiện nếu khóa
                         lockIcon.gameObject.SetActive(!unlocked);
                     }
 
                     btn.onClick.RemoveAllListeners();
-                    int capturedIndex = levelIndex; // capture biến để dùng đúng trong lambda
+                    int capturedIndex = levelIndex;
                     btn.onClick.AddListener(() => OnLevelButtonClicked(capturedIndex));
                 }
             }
         }
+    }
+
+    // Khi người chơi bấm nút level
+    public void OnLevelButtonClicked(int levelIndex)
+    {
+        currentLevelIndex = levelIndex;
+
+        // Gán level được chọn trong LevelManager
+        LevelManager.Instance.SetSelectedMapIndex(levelIndex);
+
+        // Gọi LoadLevel của LevelManager để kích hoạt level tương ứng
+        LevelManager.Instance.LoadLevel();
+
+        HidePanel(selectGroup);
+        // Hiện panel gameplay nếu có
+    }
+
+    // Gọi khi người chơi hoàn thành level hiện tại
+    public void CompleteCurrentLevel()
+    {
+        if (currentLevelIndex < 0) return;
+
+        // Gọi hàm lưu level hoàn thành trong LevelManager
+        LevelManager.Instance.CompleteLevel();
+
+        // Mở khóa level tiếp theo bằng PlayerPrefs (cơ chế mở khóa vẫn dựa vào completed của level trước)
+        int nextLevel = currentLevelIndex + 1;
+        if (nextLevel < levels.Length)
+        {
+            PlayerPrefs.SetInt("LevelCompleted_" + currentLevelIndex, 1);
+            PlayerPrefs.Save();
+        }
+
+        UpdateLevelButtons();
     }
 }

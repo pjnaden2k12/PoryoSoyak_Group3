@@ -3146,7 +3146,6 @@ GameObject:
   - component: {fileID: 1217450030}
   - component: {fileID: 1217450029}
   - component: {fileID: 1217450028}
-  - component: {fileID: 1217450031}
   m_Layer: 5
   m_Name: lv2
   m_TagString: Untagged
@@ -3256,21 +3255,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1217450026}
   m_CullTransparentMesh: 1
---- !u!114 &1217450031
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1217450026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c9c3cb1c0947c74f88e61a5e776d719, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelIndex: 0
-  button: {fileID: 1217450028}
-  lockIcon: {fileID: 1686591409}
 --- !u!1 &1218850085
 GameObject:
   m_ObjectHideFlags: 0
@@ -5727,6 +5711,10 @@ MonoBehaviour:
   Selectlevelpanel: {fileID: 292112180}
   homeAndHelpMusic: {fileID: 8300000, guid: 8ece7b2796571ee4e8bdd9a4a8427841, type: 3}
   selectLevelMusic: {fileID: 8300000, guid: 7837e2ee83b6c5547a3c41f640328ed5, type: 3}
+  levels:
+  - {fileID: 1363565189}
+  - {fileID: 509278177}
+  - {fileID: 1359107238}
 --- !u!4 &1928963313
 Transform:
   m_ObjectHideFlags: 0
