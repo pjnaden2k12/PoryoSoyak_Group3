@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using DG.Tweening; // Đảm bảo bạn đã import DOTween
+using DG.Tweening; 
 
 public class UiManager : MonoBehaviour
 {
@@ -11,11 +11,28 @@ public class UiManager : MonoBehaviour
     private CanvasGroup helpGroup;
     private CanvasGroup selectGroup;
 
+    public AudioClip homeAndHelpMusic;
+    public AudioClip selectLevelMusic;
+
+    private AudioSource musicSource;
+    private AudioSource sfxSource;
+
     private void Start()
     {
         homeGroup = SetupCanvasGroup(HomePanel);
         helpGroup = SetupCanvasGroup(HelpPanel);
         selectGroup = SetupCanvasGroup(Selectlevelpanel);
+
+        musicSource = gameObject.AddComponent<AudioSource>();
+        musicSource.loop = true;
+        musicSource.playOnAwake = false;
+        musicSource.clip = homeAndHelpMusic;
+        musicSource.volume = 0.5f; 
+        musicSource.Play();
+
+        sfxSource = gameObject.AddComponent<AudioSource>();
+        sfxSource.playOnAwake = false;
+        sfxSource.loop = false;
 
         ShowPanel(homeGroup);
         HidePanel(helpGroup, false);
@@ -61,11 +78,25 @@ public class UiManager : MonoBehaviour
         HidePanel(helpGroup);
         HidePanel(selectGroup);
         ShowPanel(homeGroup);
+
+        if (musicSource.clip != homeAndHelpMusic)
+        {
+            musicSource.Stop();
+            musicSource.clip = homeAndHelpMusic;
+            musicSource.Play();
+        }
+        else if (!musicSource.isPlaying)
+        {
+            musicSource.Play();
+        }
     }
 
     public void GoSelectLevel()
     {
         HidePanel(homeGroup);
         ShowPanel(selectGroup);
+
+        musicSource.Stop();
+        sfxSource.PlayOneShot(selectLevelMusic);
     }
 }

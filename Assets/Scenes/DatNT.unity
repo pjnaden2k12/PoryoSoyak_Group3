@@ -2320,6 +2320,8 @@ MonoBehaviour:
   HomePanel: {fileID: 875055013}
   HelpPanel: {fileID: 138789280}
   Selectlevelpanel: {fileID: 292112180}
+  homeAndHelpMusic: {fileID: 8300000, guid: 8ece7b2796571ee4e8bdd9a4a8427841, type: 3}
+  selectLevelMusic: {fileID: 8300000, guid: 7837e2ee83b6c5547a3c41f640328ed5, type: 3}
 --- !u!4 &1928963313
 Transform:
   m_ObjectHideFlags: 0
