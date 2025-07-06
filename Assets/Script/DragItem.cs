@@ -11,10 +11,15 @@ public class DragItem : MonoBehaviour
     private LayerMask itemLayer;
     public bool isSnapped = false;
 
+    public void SetStartPosition(Vector3 pos)
+    {
+        startPosition = pos;
+        transform.position = pos;
+    }
+
     void Start()
     {
         cam = Camera.main;
-        startPosition = transform.position;
         itemLayer = LayerMask.GetMask("ItemLayer");
 
         if (gameObject.layer != LayerMask.NameToLayer("ItemLayer"))
@@ -55,48 +60,69 @@ public class DragItem : MonoBehaviour
             isDragging = false;
 
             Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.2f);
-            bool hitNoBlock = false;
             bool snapped = false;
+            bool droppedOnTable = false;
 
             foreach (Collider2D col in hits)
             {
-                if (col.CompareTag("noBlock"))
+                if (col.CompareTag("Table"))
                 {
-                    hitNoBlock = true;
-                    break;
+                    droppedOnTable = true;
                 }
-            }
-
-            if (hitNoBlock)
-            {
-                if (currentBlock != null)
-                {
-                    transform.position = currentBlock.position;
-                    isSnapped = true;
-                }
-                else
-                {
-                    transform.position = startPosition;
-                    isSnapped = false;
-                }
-                return;
             }
 
             foreach (Collider2D col in hits)
             {
                 if (col.CompareTag("Block"))
                 {
-                    transform.position = col.transform.position;
-                    currentBlock = col.transform;
-                    snapped = true;
-                    isSnapped = true;
-                    break;
+                    bool hasNoBlock = false;
+
+                    foreach (Collider2D c in hits)
+                    {
+                        if (c.CompareTag("noBlock") && c.transform.IsChildOf(col.transform))
+                        {
+                            hasNoBlock = true;
+                            break;
+                        }
+                    }
+
+                    if (hasNoBlock)
+                    {
+                        continue;
+                    }
+
+                    bool blockOccupied = false;
+                    Collider2D[] itemsAtBlock = Physics2D.OverlapCircleAll(col.transform.position, 0.01f, itemLayer);
+
+                    foreach (Collider2D item in itemsAtBlock)
+                    {
+                        if (item.gameObject != gameObject)
+                        {
+                            blockOccupied = true;
+                            break;
+                        }
+                    }
+
+                    if (!blockOccupied)
+                    {
+                        transform.position = col.transform.position;
+                        currentBlock = col.transform;
+                        isSnapped = true;
+                        snapped = true;
+                        break;
+                    }
                 }
             }
 
             if (!snapped)
             {
-                if (currentBlock != null)
+                if (droppedOnTable)
+                {
+                    transform.position = startPosition;
+                    currentBlock = null;
+                    isSnapped = false;
+                }
+                else if (currentBlock != null)
                 {
                     transform.position = currentBlock.position;
                     isSnapped = true;

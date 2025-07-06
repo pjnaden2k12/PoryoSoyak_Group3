@@ -63,6 +63,10 @@ public class GameManager : MonoBehaviour
         MedicineAutoMove.isPlayPressed = false;
         OnGameStateChanged?.Invoke(false);
         OnGameEnded?.Invoke(true);
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.CompleteLevel();
+        }
         Debug.Log("Win! Không còn medicine tag nào.");
     }
 

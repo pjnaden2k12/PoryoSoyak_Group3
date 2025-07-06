@@ -8,6 +8,7 @@ public class GameManagerUI : MonoBehaviour
 {
     public Button playButton;
     public Button pauseButton;
+    public Button homeButton;
 
     public TextMeshProUGUI requiredTimeText1;
     public TextMeshProUGUI requiredTimeText2;
@@ -50,6 +51,8 @@ public class GameManagerUI : MonoBehaviour
     {
         playButton.gameObject.SetActive(false);
         pauseButton.gameObject.SetActive(false);
+        homeButton.gameObject.SetActive(true);
+
 
         resultPanel.SetActive(true);
         resultImage.gameObject.SetActive(true);
@@ -206,6 +209,20 @@ public class GameManagerUI : MonoBehaviour
                 sr.color = c;
             }
         }
+    }
+    public void OnHomeButtonPressed()
+    {
+        DOTween.KillAll();
+        MedicineAutoMove.isPlayPressed = false;
+        GameManager.Instance.ResetGame();
+
+        var mapSpawner = FindFirstObjectByType<MapSpawner>();
+        if (mapSpawner != null)
+        {
+            Destroy(mapSpawner.gameObject);
+        }
+
+        // load về panel home
     }
 
 }

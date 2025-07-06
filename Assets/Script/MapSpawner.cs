@@ -31,19 +31,23 @@ public class MapSpawner : MonoBehaviour
 
     void Start()
     {
-        if (mapList == null || selectedMapIndex < 0 || selectedMapIndex >= mapList.allMaps.Length)
+        int index = LevelManager.Instance != null ? LevelManager.Instance.SelectedMapIndex : 0;
+        if (mapList == null || index < 0 || index >= mapList.allMaps.Length)
         {
-            Debug.LogError("Map không hợp lệ hoặc chưa được cấu hình.");
+            Debug.LogError("Invalid map index");
             return;
         }
 
-        mapData = mapList.allMaps[selectedMapIndex]; // lấy map cần spawn
+        mapData = mapList.allMaps[index];
         GameManager.Instance.requiredTime = mapData.playTimeLimit;
+
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
         SpawnMedicines();
     }
+
+
     void SpawnBlocks()
     {
         foreach (var data in mapData.blocks)
@@ -83,15 +87,19 @@ public class MapSpawner : MonoBehaviour
             }
         }
     }
-
     void SpawnItems()
     {
         foreach (var item in mapData.items)
         {
             if (item.typeIndex < itemPrefabs.Length)
             {
-                // Spawn item làm child của đối tượng chứa MapSpawner
-                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
+                GameObject itemObj = Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
+
+                DragItem dragItem = itemObj.GetComponent<DragItem>();
+                if (dragItem != null)
+                {
+                    dragItem.SetStartPosition(item.position);
+                }
             }
         }
     }
