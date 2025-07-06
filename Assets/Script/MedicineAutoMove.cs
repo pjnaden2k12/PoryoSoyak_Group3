@@ -37,7 +37,6 @@ public class MedicineAutoMove : MonoBehaviour
             Vector2 moveDirection = currentBlockID.exitDirection;
             Vector2 targetPosition = (Vector2)transform.position + moveDirection;
 
-            // Quét tất cả các item có thể có ở ô đích
             Collider2D[] hits = Physics2D.OverlapCircleAll(targetPosition, 0.2f, itemLayerMask);
 
             // ƯU TIÊN 1: KIỂM TRA TRẠM TRUNG CHUYỂN (FULLMOVE)
@@ -45,7 +44,6 @@ public class MedicineAutoMove : MonoBehaviour
             {
                 if (hit.GetComponent<CrossroadsJunction>() != null)
                 {
-                    // Tìm thấy trạm trung chuyển -> Thực hiện bước nhảy 2 ô
                     Vector3 finalDestination = transform.position + ((Vector3)moveDirection * 2);
                     MoveToTarget(finalDestination, moveDuration * 1.5f);
                     return;
@@ -57,7 +55,6 @@ public class MedicineAutoMove : MonoBehaviour
             {
                 if (bridge.entryBlock == currentBlockID.transform)
                 {
-                    // Tìm thấy cầu nối được kết nối -> Dịch chuyển
                     MoveToTarget(bridge.exitBlock.position);
                     return;
                 }
