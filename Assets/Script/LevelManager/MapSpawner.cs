@@ -97,6 +97,12 @@ public class MapSpawner : MonoBehaviour
                 blockID.id = data.id;
                 blockID.exitDirection = data.exitDirection;
             }
+            if (data.hasNoBlock && noBlockChildPrefab != null)
+            {
+
+                GameObject child = Instantiate(noBlockChildPrefab, block.transform);
+                child.transform.localPosition = Vector3.zero;
+            }
 
             Vector2Int posInt = new Vector2Int(Mathf.RoundToInt(data.position.x), Mathf.RoundToInt(data.position.y));
             if (blockID != null && !blockMap.ContainsKey(posInt))

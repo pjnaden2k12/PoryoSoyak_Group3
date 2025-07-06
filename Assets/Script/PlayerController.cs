@@ -56,13 +56,18 @@ public class PlayerController : MonoBehaviour
             if (col.CompareTag(gameObject.tag))
             {
                 matchedMedicine = col.gameObject;
+                StartCoroutine(PlaySoundWithDelay("correct", 1.0f));
                 hasEnded = true;
                 StartCoroutine(HandleWinSequence());
                 break;
             }
         }
     }
-
+    private IEnumerator PlaySoundWithDelay(string soundName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        AudioManager.Instance.Play(soundName);
+    }
     private IEnumerator HandleWinSequence()
     {
         if (matchedMedicine != null)

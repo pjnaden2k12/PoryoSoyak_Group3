@@ -88,6 +88,7 @@ public class GameManager : MonoBehaviour
         isGamePlaying = false;
         MedicineAutoMove.isPlayPressed = false;
         OnGameStateChanged?.Invoke(false);
+        AudioManager.Instance.Play("win");
         OnGameEnded?.Invoke(true);
         if (LevelManager.Instance != null)
         {
@@ -96,11 +97,12 @@ public class GameManager : MonoBehaviour
         Debug.Log("Win! Không còn medicine tag nào.");
     }
 
-    void LoseGame()
+   public  void LoseGame()
     {
         if (!isGamePlaying) return;
         isGamePlaying = false;
         MedicineAutoMove.isPlayPressed = false;
+        AudioManager.Instance.Play("lose");
         OnGameStateChanged?.Invoke(false);
         OnGameEnded?.Invoke(false);
         Debug.Log("Lose! Vẫn còn medicine tag khi hết thời gian.");

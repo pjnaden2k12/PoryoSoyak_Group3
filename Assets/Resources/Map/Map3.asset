@@ -10,84 +10,104 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7a47bc7ad2be87448af44765eaad2bfd, type: 3}
-  m_Name: Map1
+  m_Name: Map3
   m_EditorClassIdentifier: 
   blocks:
   - id: 0
     position: {x: 0, y: 0}
     type: 0
-    hasNoBlock: 1
-    hasMedicine: 0
-    medicineTypeIndices: 0
+    hasNoBlock: 0
+    exitDirection: {x: 1, y: 0}
+    medicineTypeIndices: 02000000
+    hasMedicine: 1
   - id: 1
     position: {x: 1, y: 0}
     type: 3
-    hasNoBlock: 0
+    hasNoBlock: 1
+    exitDirection: {x: 1, y: 0}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   - id: 2
     position: {x: 2, y: 0}
     type: 3
     hasNoBlock: 0
-    hasMedicine: 0
-    medicineTypeIndices: 0
+    exitDirection: {x: 1, y: 0}
+    medicineTypeIndices: 01000000
+    hasMedicine: 1
   - id: 3
     position: {x: 3, y: 0}
     type: 1
-    hasNoBlock: 0
+    hasNoBlock: 1
+    exitDirection: {x: 0, y: -1}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   - id: 4
     position: {x: 3, y: -1}
     type: 2
     hasNoBlock: 0
+    exitDirection: {x: 0, y: -1}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   - id: 5
     position: {x: 3, y: -2}
     type: 2
-    hasNoBlock: 0
+    hasNoBlock: 1
+    exitDirection: {x: 0, y: -1}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   - id: 6
     position: {x: 3, y: -3}
     type: 5
     hasNoBlock: 0
-    hasMedicine: 0
-    medicineTypeIndices: 0
+    exitDirection: {x: -1, y: 0}
+    medicineTypeIndices: 00000000
+    hasMedicine: 1
   - id: 7
     position: {x: 2, y: -3}
     type: 3
     hasNoBlock: 0
-    hasMedicine: 0
-    medicineTypeIndices: 0
+    exitDirection: {x: -1, y: 0}
+    medicineTypeIndices: 00000000
+    hasMedicine: 1
   - id: 8
     position: {x: 1, y: -3}
     type: 3
     hasNoBlock: 0
+    exitDirection: {x: -1, y: 0}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   - id: 9
     position: {x: 0, y: -3}
     type: 4
-    hasNoBlock: 0
+    hasNoBlock: 1
+    exitDirection: {x: 0, y: 1}
+    medicineTypeIndices: 
     hasMedicine: 1
-    medicineTypeIndices: 0
   - id: 10
     position: {x: 0, y: -2}
     type: 2
     hasNoBlock: 0
-    hasMedicine: 0
-    medicineTypeIndices: 0
+    exitDirection: {x: 0, y: 1}
+    medicineTypeIndices: 01000000
+    hasMedicine: 1
   - id: 11
     position: {x: 0, y: -1}
     type: 2
     hasNoBlock: 0
+    exitDirection: {x: 0, y: 1}
+    medicineTypeIndices: 
     hasMedicine: 0
-    medicineTypeIndices: 0
   players:
-  - position: {x: -1, y: 0}
+  - position: {x: 1, y: 1}
+    typeIndex: 0
+  - position: {x: 3, y: 1}
     typeIndex: 2
+  - position: {x: 4, y: -1}
+    typeIndex: 2
+  - position: {x: 0, y: -4}
+    typeIndex: 1
+  - position: {x: -1, y: -1}
+    typeIndex: 1
   items:
   - position: {x: 7.4, y: 0.3}
     typeIndex: 0
@@ -95,4 +115,4 @@ MonoBehaviour:
     typeIndex: 1
   - position: {x: 7.4, y: -1.7}
     typeIndex: 2
-  playTimeLimit: 5
+  playTimeLimit: 8
