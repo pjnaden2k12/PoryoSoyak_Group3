@@ -550,7 +550,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 2.22, y: -1.01748, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6451125150430755345}
@@ -595,9 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66fd7b8128ce97840b3d5070b9e8ae74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTypeIndex: 2
-  smokeEffect: {fileID: 0}
   detectionRadius: 3
-  itemLayer:
+  medicineLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
