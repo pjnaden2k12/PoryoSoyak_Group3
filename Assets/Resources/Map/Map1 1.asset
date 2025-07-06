@@ -18,57 +18,57 @@ MonoBehaviour:
     type: 0
     hasNoBlock: 1
     exitDirection: {x: 1, y: 0}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 1
     position: {x: 1, y: 0}
     type: 3
     hasNoBlock: 0
     exitDirection: {x: 1, y: 0}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 2
     position: {x: 2, y: 0}
     type: 1
     hasNoBlock: 0
     exitDirection: {x: 0, y: -1}
-    hasMedicine: 1
     medicineTypeIndices: 00000000
+    hasMedicine: 1
   - id: 3
     position: {x: 2, y: -1}
     type: 2
     hasNoBlock: 0
     exitDirection: {x: 0, y: -1}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 4
     position: {x: 2, y: -2}
     type: 5
     hasNoBlock: 0
     exitDirection: {x: -1, y: 0}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 5
     position: {x: 1, y: -2}
     type: 3
     hasNoBlock: 0
     exitDirection: {x: -1, y: 0}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 6
     position: {x: 0, y: -2}
     type: 4
     hasNoBlock: 0
     exitDirection: {x: 0, y: 1}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   - id: 7
     position: {x: 0, y: -1}
     type: 2
     hasNoBlock: 0
     exitDirection: {x: 0, y: 1}
-    hasMedicine: 0
     medicineTypeIndices: 
+    hasMedicine: 0
   players: []
   items:
   - position: {x: 7.4, y: 0.3}
@@ -85,3 +85,4 @@ MonoBehaviour:
     typeIndex: 5
   - position: {x: 9.4, y: -0.7}
     typeIndex: 6
+  playTimeLimit: 60

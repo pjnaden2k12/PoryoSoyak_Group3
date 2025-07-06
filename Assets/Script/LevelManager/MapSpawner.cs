@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class MapSpawner : MonoBehaviour
 {
-    [Header("Map Data List")]
+    [Header("Map Data")]
     public GameMapList mapList;
 
     [Header("Block Prefabs")]
@@ -16,66 +16,76 @@ public class MapSpawner : MonoBehaviour
     public GameObject prefabDownRight;
     public GameObject noBlockChildPrefab;
 
-    [Header("Player Prefabs")]
+    [Header("Other Prefabs")]
     public GameObject[] playerPrefabs;
-
-    [Header("Item Prefabs")]
     public GameObject[] itemPrefabs;
-
-    [Header("Medicine Prefabs")]
     public GameObject[] medicinePrefabs;
 
-    private MapData mapData;
-    private Dictionary<int, Transform> spawnedBlocksById = new();
-    public static Dictionary<Vector2Int, BlockID> blockMap = new Dictionary<Vector2Int, BlockID>();
+    private MapData currentMapData;
+    public static Dictionary<Vector2Int, BlockID> blockMap;
 
-
+    // Thêm sự kiện để GameManagerUI có thể lắng nghe
     public static event Action OnMapSpawned;
-    public void SpawnMap()
+
+    void Awake()
     {
+        // Luôn dọn dẹp và khởi tạo lại các biến tĩnh
+        blockMap = new Dictionary<Vector2Int, BlockID>();
+        InstantBridge.ActiveBridges.Clear();
+    }
 
-        foreach (Transform child in transform)
-            Destroy(child.gameObject);
+    // Hàm public để các script khác gọi đến và bắt đầu spawn map
+    public void SpawnMap(int mapIndex)
+    {
+        ClearCurrentMap();
 
-        spawnedBlocksById.Clear();
-        BlockPositionManager.blockPositions.Clear();
-
-        int index = LevelManager.Instance.SelectedMapIndex;
-        if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
-
-        mapData = mapList.allMaps[index];
-
-        // Gọi cập nhật map hiện tại và thời gian cho GameManager
-        if (GameManager.Instance != null)
+        if (mapList == null || mapIndex < 0 || mapIndex >= mapList.allMaps.Length)
         {
-            GameManager.Instance.SetCurrentMap(index);
+            Debug.LogError("Map index không hợp lệ!");
+            return;
         }
 
+        currentMapData = mapList.allMaps[mapIndex];
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetCurrentMap(mapIndex);
+        }
+        // Thực hiện spawn
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
         SpawnMedicines();
 
+        // Gửi thông báo rằng map đã được spawn xong
         OnMapSpawned?.Invoke();
     }
 
-
+    // Hàm public để LevelManager gọi khi cần reset
     public void ResetMap()
     {
+        ClearCurrentMap();
+    }
+
+    private void ClearCurrentMap()
+    {
         foreach (Transform child in transform)
+        {
             Destroy(child.gameObject);
+        }
+        blockMap.Clear();
+        InstantBridge.ActiveBridges.Clear();
     }
 
     void SpawnBlocks()
     {
-        foreach (var data in mapData.blocks)
+        if (currentMapData.blocks == null) return;
+        foreach (var data in currentMapData.blocks)
         {
             GameObject prefab = GetBlockPrefab(data.type);
             if (prefab == null) continue;
 
-            // Spawn block làm child của đối tượng chứa MapSpawner
-            GameObject block = Instantiate(prefab, (Vector3)data.position, Quaternion.identity, transform);  // 'transform' là đối tượng chứa script MapSpawner
-            block.tag = "Block";
+            GameObject block = Instantiate(prefab, (Vector3)data.position, Quaternion.identity, transform);
+            block.layer = LayerMask.NameToLayer("BlockLayer");
 
             BlockID blockID = block.GetComponent<BlockID>();
             if (blockID != null)
@@ -84,17 +94,7 @@ public class MapSpawner : MonoBehaviour
                 blockID.exitDirection = data.exitDirection;
             }
 
-            if (data.hasNoBlock && noBlockChildPrefab != null)
-            {
-                // Spawn child nếu có
-                GameObject child = Instantiate(noBlockChildPrefab, block.transform);
-                child.transform.localPosition = Vector3.zero;
-            }
-
-            spawnedBlocksById[data.id] = block.transform;
             Vector2Int posInt = new Vector2Int(Mathf.RoundToInt(data.position.x), Mathf.RoundToInt(data.position.y));
-            BlockPositionManager.blockPositions.Add(posInt);
-
             if (blockID != null && !blockMap.ContainsKey(posInt))
             {
                 blockMap.Add(posInt, blockID);
@@ -102,44 +102,54 @@ public class MapSpawner : MonoBehaviour
         }
     }
 
+    // Cập nhật lại hàm SpawnMedicines để dùng mảng medicineTypeIndices
+    void SpawnMedicines()
+    {
+        if (currentMapData.blocks == null) return;
+        foreach (var blockData in currentMapData.blocks)
+        {
+            if (blockData.hasMedicine && blockData.medicineTypeIndices != null)
+            {
+                if (blockMap.TryGetValue(new Vector2Int(Mathf.RoundToInt(blockData.position.x), Mathf.RoundToInt(blockData.position.y)), out BlockID block))
+                {
+                    foreach (var typeIndex in blockData.medicineTypeIndices)
+                    {
+                        if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
+                        {
+                            Instantiate(medicinePrefabs[typeIndex], block.transform.position, Quaternion.identity, transform);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    // Các hàm SpawnPlayers và SpawnItems không có lỗi, có thể giữ nguyên
     void SpawnPlayers()
     {
-        foreach (var p in mapData.players)
+        if (currentMapData.players == null) return;
+        foreach (var p in currentMapData.players)
         {
             if (p.typeIndex < playerPrefabs.Length)
+            {
                 Instantiate(playerPrefabs[p.typeIndex], (Vector3)p.position, Quaternion.identity, transform);
+            }
         }
     }
 
     void SpawnItems()
     {
-        foreach (var item in mapData.items)
+        if (currentMapData.items == null) return;
+        foreach (var item in currentMapData.items)
         {
             if (item.typeIndex < itemPrefabs.Length)
             {
-                GameObject itemObj = Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
-                var dragItem = itemObj.GetComponent<DragItem>();
-                if (dragItem != null)
-                    dragItem.SetStartPosition(item.position);
+                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
             }
         }
     }
 
-    void SpawnMedicines()
-    {
-        foreach (var block in mapData.blocks)
-        {
-            if (!block.hasMedicine) continue;
-            if (!spawnedBlocksById.TryGetValue(block.id, out Transform blockTransform)) continue;
-
-            int typeIndex = block.medicineTypeIndices;
-            if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
-                Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity, transform);
-        }
-    }
-
-    GameObject GetBlockPrefab(BlockType type)
+    private GameObject GetBlockPrefab(BlockType type)
     {
         return type switch
         {
@@ -152,9 +162,4 @@ public class MapSpawner : MonoBehaviour
             _ => null,
         };
     }
-}
-
-public static class BlockPositionManager
-{
-    public static HashSet<Vector2Int> blockPositions = new();
 }
