@@ -19,7 +19,7 @@ public struct BlockEntry
     public Vector2 exitDirection;
 
     public bool hasMedicine;
-    public int medicineTypeIndex;
+    public int medicineTypeIndices;
 }
 
 

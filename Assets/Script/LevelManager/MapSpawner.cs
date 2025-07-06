@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class MapSpawner : MonoBehaviour
 {
@@ -27,24 +27,28 @@ public class MapSpawner : MonoBehaviour
 
     private MapData mapData;
     private Dictionary<int, Transform> spawnedBlocksById = new();
+    public static Dictionary<Vector2Int, BlockID> blockMap = new Dictionary<Vector2Int, BlockID>();
+
 
     public static event Action OnMapSpawned;
-
-    public void SpawnMap(int mapIndex)
+    public void SpawnMap()
     {
-        ClearMap();
 
-        if (mapList == null || mapIndex < 0 || mapIndex >= mapList.allMaps.Length)
-        {
-            Debug.LogError("Map index không hợp lệ hoặc mapList chưa được gán.");
-            return;
-        }
+        foreach (Transform child in transform)
+            Destroy(child.gameObject);
 
-        mapData = mapList.allMaps[mapIndex];
+        spawnedBlocksById.Clear();
+        BlockPositionManager.blockPositions.Clear();
 
+        int index = LevelManager.Instance.SelectedMapIndex;
+        if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
+
+        mapData = mapList.allMaps[index];
+
+        // Gọi cập nhật map hiện tại và thời gian cho GameManager
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.SetCurrentMap(mapIndex);
+            GameManager.Instance.SetCurrentMap(index);
         }
 
         SpawnBlocks();
@@ -55,20 +59,11 @@ public class MapSpawner : MonoBehaviour
         OnMapSpawned?.Invoke();
     }
 
+
     public void ResetMap()
     {
-        ClearMap();
-    }
-
-    private void ClearMap()
-    {
-        // Xóa toàn bộ con để reset
         foreach (Transform child in transform)
-        {
             Destroy(child.gameObject);
-        }
-        spawnedBlocksById.Clear();
-        BlockPositionManager.blockPositions.Clear();
     }
 
     void SpawnBlocks()
@@ -107,15 +102,13 @@ public class MapSpawner : MonoBehaviour
         }
     }
 
+
     void SpawnPlayers()
     {
         foreach (var p in mapData.players)
         {
             if (p.typeIndex < playerPrefabs.Length)
-            {
-                // Spawn player làm child của đối tượng chứa MapSpawner
-                Instantiate(playerPrefabs[p.typeIndex], (Vector3)p.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
-            }
+                Instantiate(playerPrefabs[p.typeIndex], (Vector3)p.position, Quaternion.identity, transform);
         }
     }
 
@@ -125,8 +118,10 @@ public class MapSpawner : MonoBehaviour
         {
             if (item.typeIndex < itemPrefabs.Length)
             {
-                // Spawn item làm child của đối tượng chứa MapSpawner
-                Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform); // 'transform' là đối tượng chứa script MapSpawner
+                GameObject itemObj = Instantiate(itemPrefabs[item.typeIndex], (Vector3)item.position, Quaternion.identity, transform);
+                var dragItem = itemObj.GetComponent<DragItem>();
+                if (dragItem != null)
+                    dragItem.SetStartPosition(item.position);
             }
         }
     }
@@ -135,27 +130,16 @@ public class MapSpawner : MonoBehaviour
     {
         foreach (var block in mapData.blocks)
         {
-            if (!block.hasMedicine)
-                continue;
+            if (!block.hasMedicine) continue;
+            if (!spawnedBlocksById.TryGetValue(block.id, out Transform blockTransform)) continue;
 
-            if (!spawnedBlocksById.TryGetValue(block.id, out Transform blockTransform))
-                continue;
-
-            int typeIndex = block.medicineTypeIndex;  // Lấy một chỉ số duy nhất
-
+            int typeIndex = block.medicineTypeIndices;
             if (typeIndex >= 0 && typeIndex < medicinePrefabs.Length)
-            {
                 Instantiate(medicinePrefabs[typeIndex], blockTransform.position, Quaternion.identity, transform);
-            }
-            else
-            {
-                Debug.LogWarning($"Invalid medicine typeIndex {typeIndex} on block ID {block.id}");
-            }
         }
     }
 
-
-    private GameObject GetBlockPrefab(BlockType type)
+    GameObject GetBlockPrefab(BlockType type)
     {
         return type switch
         {
@@ -168,9 +152,6 @@ public class MapSpawner : MonoBehaviour
             _ => null,
         };
     }
-
-    // Để DragMove có thể gọi set lại vị trí bắt đầu
-    public static Dictionary<Vector2Int, BlockID> blockMap = new();
 }
 
 public static class BlockPositionManager
