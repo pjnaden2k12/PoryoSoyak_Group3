@@ -44,18 +44,35 @@ public class DragMove : MonoBehaviour
         {
             isDragging = false;
 
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 0.2f);
+            bool isOverTable = false;
+
+            foreach (var col in hits)
+            {
+                if (col.CompareTag("Table"))
+                {
+                    isOverTable = true;
+                    break;
+                }
+            }
+
+            if (isOverTable)
+            {
+                transform.position = startPosition;
+                isSnapped = false;
+                return;
+            }
+
             Vector2Int snappedPos = new Vector2Int(
                 Mathf.RoundToInt(transform.position.x),
                 Mathf.RoundToInt(transform.position.y)
             );
 
-            // Kiểm tra xem vị trí này đã có block chưa
             if (!BlockPositionManager.blockPositions.Contains(snappedPos))
             {
-                // Kiểm tra số lượng block xung quanh vị trí (up, down, left, right)
                 Vector2Int[] directions = {
-                Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
-            };
+                    Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
+                };
 
                 int nearbyBlockCount = 0;
 
@@ -67,7 +84,6 @@ public class DragMove : MonoBehaviour
                     }
                 }
 
-                // Nếu có ít nhất 2 block xung quanh và vị trí chưa có block, snap vào vị trí này
                 if (nearbyBlockCount >= 2)
                 {
                     transform.position = new Vector3(snappedPos.x, snappedPos.y, 0f);
@@ -81,11 +97,9 @@ public class DragMove : MonoBehaviour
             }
             else
             {
-                // Nếu vị trí đã có block, không snap và đưa về vị trí ban đầu
                 transform.position = startPosition;
                 isSnapped = false;
             }
         }
     }
-
 }
