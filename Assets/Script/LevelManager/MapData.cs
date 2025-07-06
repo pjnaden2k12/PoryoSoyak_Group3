@@ -16,9 +16,10 @@ public struct BlockEntry
     public Vector2 position;
     public BlockType type;
     public bool hasNoBlock;
+    public Vector2 exitDirection;
 
     public bool hasMedicine;
-    public int medicineTypeIndices; 
+    public int medicineTypeIndex;
 }
 
 
