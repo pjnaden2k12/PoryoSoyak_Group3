@@ -5,7 +5,7 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance;
 
-    private int selectedMapIndex = 0;
+    private int selectedMapIndex = -1;
     public int SelectedMapIndex => selectedMapIndex;
 
     private void Awake()

@@ -15,7 +15,7 @@ public class DialogueManager : MonoBehaviour
         public string dialogueText;
         public bool isLeftSide;
     }
-
+    public GameObject storyUI;
     [Header("Dialogue Data")]
     public DialogueLine[] lines;
 
@@ -28,18 +28,13 @@ public class DialogueManager : MonoBehaviour
     [Header("Fade UI")]
     public Image blackOverlay; // 🟥 Kéo Image đen vào đây
 
-    [Header("After Dialogue")]
-    public GameObject gameplayPrefab;
-
     private int currentLine = 0;
     private bool isTyping = false;
     private Coroutine typingCoroutine;
 
     void Start()
     {
-        // Reset trạng thái
-        leftImage.transform.localScale = Vector3.one;
-        rightImage.transform.localScale = Vector3.one;
+        
         currentLine = 0;
 
         // Mờ màn hình đen → rồi hiện hội thoại
@@ -105,22 +100,23 @@ public class DialogueManager : MonoBehaviour
     {
         nextButton.interactable = false;
 
-        // Thu nhỏ nhân vật
         Sequence shrink = DOTween.Sequence();
         shrink.Join(leftImage.transform.DOScale(Vector3.zero, 0.5f));
         shrink.Join(rightImage.transform.DOScale(Vector3.zero, 0.5f));
         yield return shrink.WaitForCompletion();
 
-        // Tối màn hình lại
-        blackOverlay.DOFade(1, 1f).OnComplete(() =>
-        {
-            gameObject.SetActive(false);
+        yield return blackOverlay.DOFade(1, 1f).WaitForCompletion();
 
-            if (gameplayPrefab != null)
+        if (storyUI != null)
+        {
+            // Tắt tất cả object con trong storyUI
+            foreach (Transform child in storyUI.transform)
             {
-                Instantiate(gameplayPrefab, Vector3.zero, Quaternion.identity);
+                child.gameObject.SetActive(false);
             }
-        });
+        }
+
+        gameObject.SetActive(false);
     }
 
     void SetAlpha(Image img, float a)

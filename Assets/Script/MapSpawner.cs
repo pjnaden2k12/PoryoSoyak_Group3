@@ -31,12 +31,10 @@ public class MapSpawner : MonoBehaviour
 
     void Start()
     {
-        int index = LevelManager.Instance != null ? LevelManager.Instance.SelectedMapIndex : 0;
-        if (mapList == null || index < 0 || index >= mapList.allMaps.Length)
-        {
-            Debug.LogError("Invalid map index");
-            return;
-        }
+        if (LevelManager.Instance == null) return;
+
+        int index = LevelManager.Instance.SelectedMapIndex;
+        if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
 
         mapData = mapList.allMaps[index];
         GameManager.Instance.requiredTime = mapData.playTimeLimit;
@@ -46,7 +44,6 @@ public class MapSpawner : MonoBehaviour
         SpawnItems();
         SpawnMedicines();
     }
-
 
     void SpawnBlocks()
     {
