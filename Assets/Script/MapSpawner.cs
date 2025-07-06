@@ -29,21 +29,6 @@ public class MapSpawner : MonoBehaviour
 
     private Dictionary<int, Transform> spawnedBlocksById = new();
 
-    void Start()
-    {
-        if (LevelManager.Instance == null) return;
-
-        int index = LevelManager.Instance.SelectedMapIndex;
-        if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
-
-        mapData = mapList.allMaps[index];
-        GameManager.Instance.requiredTime = mapData.playTimeLimit;
-
-        SpawnBlocks();
-        SpawnPlayers();
-        SpawnItems();
-        SpawnMedicines();
-    }
 
     void SpawnBlocks()
     {
@@ -137,7 +122,29 @@ public class MapSpawner : MonoBehaviour
             _ => null,
         };
     }
-   
+    public void SpawnMap()
+    {
+        // Clear old map objects
+        foreach (Transform child in transform)
+        {
+            Destroy(child.gameObject);
+        }
+
+        spawnedBlocksById.Clear();
+        BlockPositionManager.blockPositions.Clear();
+
+        int index = LevelManager.Instance.SelectedMapIndex;
+        if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
+
+        mapData = mapList.allMaps[index];
+        GameManager.Instance.requiredTime = mapData.playTimeLimit;
+
+        SpawnBlocks();
+        SpawnPlayers();
+        SpawnItems();
+        SpawnMedicines();
+    }
+
 }
 public static class BlockPositionManager
 {

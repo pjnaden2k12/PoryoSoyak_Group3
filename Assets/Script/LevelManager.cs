@@ -25,8 +25,6 @@ public class LevelManager : MonoBehaviour
         selectedMapIndex = index;
     }
 
-   
-
     public void CompleteLevel()
     {
         PlayerPrefs.SetInt("LevelCompleted_" + selectedMapIndex, 1);
@@ -36,5 +34,22 @@ public class LevelManager : MonoBehaviour
     public bool IsLevelCompleted(int mapIndex)
     {
         return PlayerPrefs.GetInt("LevelCompleted_" + mapIndex, 0) == 1;
+    }
+    public void LoadLevel()
+    {
+        if (selectedMapIndex < 0)
+        {
+            Debug.LogWarning("SelectedMapIndex is invalid. Cannot load level.");
+            return;
+        }
+
+        MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
+        if (spawner == null)
+        {
+            Debug.LogError("MapSpawner not found in scene.");
+            return;
+        }
+
+        spawner.SpawnMap();
     }
 }
