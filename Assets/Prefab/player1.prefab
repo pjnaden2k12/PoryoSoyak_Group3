@@ -532,6 +532,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5018581721099700726}
   - component: {fileID: 5509648640452425145}
+  - component: {fileID: 5522857339790731770}
   m_Layer: 0
   m_Name: player1
   m_TagString: Untagged
@@ -582,3 +583,21 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5522857339790731770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7597568965675483336}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66fd7b8128ce97840b3d5070b9e8ae74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerTypeIndex: 2
+  smokeEffect: {fileID: 0}
+  detectionRadius: 3
+  itemLayer:
+    serializedVersion: 2
+    m_Bits: 64

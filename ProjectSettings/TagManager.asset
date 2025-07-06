@@ -3,18 +3,24 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Block
+  - Item
+  - noBlock
+  - mdSquare
+  - mdTriangle
+  - mdCircle
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Map
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
+  - ItemLayer
+  - BlockLayer
+  - Medicine
+  - Player
   - 
   - 
   - 
@@ -41,8 +47,14 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: New Layer 1
-    uniqueID: 3916528309
+  - name: Map
+    uniqueID: 3141952509
+    locked: 0
+  - name: Item
+    uniqueID: 4234121323
+    locked: 0
+  - name: Player
+    uniqueID: 1411289459
     locked: 0
   m_RenderingLayers:
   - Default
