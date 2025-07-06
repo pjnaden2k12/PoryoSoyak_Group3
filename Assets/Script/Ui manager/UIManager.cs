@@ -1,12 +1,14 @@
-﻿using UnityEngine;
+﻿using DG.Tweening;
+using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
+using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
     public GameObject HomePanel;
     public GameObject HelpPanel;
     public GameObject Selectlevelpanel;
+    public DialogueManager dialogueManager;
 
     private CanvasGroup homeGroup;
     private CanvasGroup helpGroup;
@@ -18,11 +20,17 @@ public class UIManager : MonoBehaviour
     private AudioSource musicSource;
     private AudioSource sfxSource;
 
-    [Header("Levels trong scene (bật/tắt theo chọn)")]
-    public GameObject[] levels;
+    public Button resetDataButton;
+    public Button[] levelButtons;
+
+    private Vector3[] originalScales;
+    private const string DialogueShownKey = "DialogueShown";
+
 
     private void Start()
     {
+        resetDataButton.onClick.AddListener(ResetAllPlayerPrefs);
+
         homeGroup = SetupCanvasGroup(HomePanel);
         helpGroup = SetupCanvasGroup(HelpPanel);
         selectGroup = SetupCanvasGroup(Selectlevelpanel);
@@ -42,7 +50,18 @@ public class UIManager : MonoBehaviour
         HidePanel(helpGroup, false);
         HidePanel(selectGroup, false);
 
-        UpdateLevelButtons();
+        CacheOriginalScales();
+        SetupLevelButtons();
+    }
+    public void ResetAllPlayerPrefs()
+    {
+        PlayerPrefs.DeleteAll();
+        PlayerPrefs.Save();
+
+        Debug.Log("PlayerPrefs đã được xóa.");
+
+        // Optional: reload scene hoặc update UI
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
     }
 
     private CanvasGroup SetupCanvasGroup(GameObject panel)
@@ -57,7 +76,6 @@ public class UIManager : MonoBehaviour
         cg.gameObject.SetActive(true);
         cg.transform.localScale = Vector3.one * 0.8f;
         cg.alpha = 0;
-
         cg.transform.DOScale(1f, duration).SetEase(Ease.OutBack).SetUpdate(true).SetId(cg);
         cg.DOFade(1f, duration).SetEase(Ease.Linear).SetUpdate(true).SetId(cg);
     }
@@ -65,7 +83,6 @@ public class UIManager : MonoBehaviour
     private void HidePanel(CanvasGroup cg, bool deactivateAfter = true, float duration = 0.3f)
     {
         DOTween.Kill(cg);
-
         cg.transform.DOScale(0.8f, duration).SetEase(Ease.InBack).SetUpdate(true).SetId(cg);
         cg.DOFade(0f, duration).SetEase(Ease.Linear).SetUpdate(true).SetId(cg).OnComplete(() =>
         {
@@ -100,64 +117,112 @@ public class UIManager : MonoBehaviour
     public void GoSelectLevel()
     {
         HidePanel(homeGroup);
-        ShowPanel(selectGroup);
+        MedicineAutoMove.isPlayPressed = false;
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ResetGame();
+        }
+
+        SetupLevelButtons(); // Load lại trạng thái các level
+
+        StartCoroutine(ShowDialogueThenSelectPanel());
+    }
+
+
+
+    private IEnumerator ShowDialogueThenSelectPanel()
+    {
+        // Kiểm tra nếu chưa hiện dialogue lần nào
+        if (PlayerPrefs.GetInt(DialogueShownKey, 0) == 0)
+        {
+            dialogueManager.gameObject.SetActive(true);
+
+            bool isDialogueDone = false;
+
+            dialogueManager.OnStoryFinished = () =>
+            {
+                isDialogueDone = true;
+            };
+
+            while (!isDialogueDone)
+                yield return null;
+
+            PlayerPrefs.SetInt(DialogueShownKey, 1);
+            PlayerPrefs.Save();
+        }
+
+        // PHÁT ÂM THANH SAU KHI HỘI THOẠI XONG
         musicSource.Stop();
         sfxSource.PlayOneShot(selectLevelMusic);
 
-        UpdateLevelButtons();
+        ShowPanel(selectGroup);
+        AnimateLevelButtons(); // nếu bạn có hiệu ứng nút
     }
 
-    public void OnLevelButtonClicked(int levelIndex)
-    {
-        // Gán level được chọn
-        LevelManager.Instance.SetSelectedMapIndex(levelIndex);
 
-        // Bật level tương ứng, tắt level khác
-        for (int i = 0; i < levels.Length; i++)
+    private void CacheOriginalScales()
+    {
+        originalScales = new Vector3[levelButtons.Length];
+        for (int i = 0; i < levelButtons.Length; i++)
         {
-            levels[i].SetActive(i == levelIndex);
+            originalScales[i] = levelButtons[i].transform.localScale;
+        }
+    }
+
+    private void AnimateLevelButtons()
+    {
+        for (int i = 0; i < levelButtons.Length; i++)
+        {
+            Transform btn = levelButtons[i].transform;
+            btn.localScale = Vector3.zero;
+
+            btn.DOScale(originalScales[i], 0.4f)
+                .SetEase(Ease.OutBack)
+                .SetDelay(i * 0.08f);
+        }
+    }
+
+    private void SetupLevelButtons()
+    {
+        int maxUnlockedLevel = -1;
+        for (int i = 0; i < levelButtons.Length; i++)
+        {
+            if (LevelManager.Instance.IsLevelCompleted(i))
+                maxUnlockedLevel = i;
         }
 
-        // Gọi MapSpawner để spawn map theo dữ liệu
-        LevelManager.Instance.LoadLevel();
-
-        // Ẩn UI chọn level
-        HidePanel(selectGroup);
-
-        // Nếu bạn có UI gameplay, bạn có thể hiện nó tại đây
-        // ShowPanel(gameplayGroup); <-- ví dụ nếu bạn có
-    }
-
-    // Cập nhật trạng thái các nút level (mở khóa hoặc khóa)
-    public void UpdateLevelButtons()
-    {
-        Button[] buttons = Selectlevelpanel.GetComponentsInChildren<Button>(true);
-
-        foreach (Button btn in buttons)
+        for (int i = 0; i < levelButtons.Length; i++)
         {
-            string name = btn.gameObject.name;
-            if (name.StartsWith("LevelButton_"))
+            Button btn = levelButtons[i];
+            Transform lockIcon = btn.transform.Find("LockIcon");
+            bool isUnlocked = i <= maxUnlockedLevel + 1;
+
+            if (lockIcon != null)
+                lockIcon.gameObject.SetActive(!isUnlocked);
+
+            btn.interactable = isUnlocked;
+            btn.onClick.RemoveAllListeners();
+
+            if (isUnlocked)
             {
-                int levelIndex;
-                if (int.TryParse(name.Substring("LevelButton_".Length), out levelIndex))
-                {
-                    bool unlocked = levelIndex == 0 || LevelManager.Instance.IsLevelCompleted(levelIndex - 1);
-
-                    btn.interactable = unlocked;
-
-                    Transform lockIcon = btn.transform.Find("LockIcon");
-                    Transform levelIcon = btn.transform.Find("LevelIcon");
-
-                    if (lockIcon != null) lockIcon.gameObject.SetActive(!unlocked);
-                    if (levelIcon != null) levelIcon.gameObject.SetActive(unlocked);
-
-                    btn.onClick.RemoveAllListeners();
-                    int capturedIndex = levelIndex;
-                    btn.onClick.AddListener(() => OnLevelButtonClicked(capturedIndex));
-                }
+                int capturedIndex = i;
+                btn.onClick.AddListener(() => OnLevelButtonClicked(capturedIndex));
             }
         }
     }
 
+    private void OnLevelButtonClicked(int index)
+    {
+        LevelManager.Instance.SetSelectedMapIndex(index);
+        LevelManager.Instance.LoadLevel();
+        HidePanel(selectGroup);
+
+        if (musicSource.clip != homeAndHelpMusic)
+        {
+            musicSource.Stop();
+            musicSource.clip = homeAndHelpMusic;
+            musicSource.Play();
+        }
+    }
 }

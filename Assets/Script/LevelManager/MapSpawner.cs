@@ -40,14 +40,21 @@ public class MapSpawner : MonoBehaviour
         if (mapList == null || index < 0 || index >= mapList.allMaps.Length) return;
 
         mapData = mapList.allMaps[index];
-        GameManager.Instance.requiredTime = mapData.playTimeLimit;
+
+        // Gọi cập nhật map hiện tại và thời gian cho GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.SetCurrentMap(index);
+        }
 
         SpawnBlocks();
         SpawnPlayers();
         SpawnItems();
         SpawnMedicines();
+
         OnMapSpawned?.Invoke();
     }
+
 
     public void ResetMap()
     {

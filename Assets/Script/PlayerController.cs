@@ -9,17 +9,45 @@ public class PlayerController : MonoBehaviour
     public LayerMask medicineLayer;
 
     private Animator animator;
-    private bool hasWon = false;
-    private GameObject matchedMedicine; // 🆕 lưu object chạm vào
+    private GameObject matchedMedicine;
+    private bool hasEnded = false;
 
     void Start()
     {
         animator = GetComponent<Animator>();
     }
 
+    void OnEnable()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnGameEnded += OnGameEnd;
+    }
+
+    void OnDisable()
+    {
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnGameEnded -= OnGameEnd;
+    }
+
+    void OnGameEnd(bool isWin)
+    {
+        if (hasEnded) return; // tránh gọi nhiều lần
+
+        hasEnded = true;
+
+        if (isWin)
+        {
+            StartCoroutine(HandleWinSequence());
+        }
+        else
+        {
+            StartCoroutine(HandleLoseSequence());
+        }
+    }
+
     void Update()
     {
-        if (hasWon) return;
+        if (hasEnded) return;
 
         Collider2D[] nearby = Physics2D.OverlapCircleAll(transform.position, detectionRadius, medicineLayer);
 
@@ -27,7 +55,8 @@ public class PlayerController : MonoBehaviour
         {
             if (col.CompareTag(gameObject.tag))
             {
-                matchedMedicine = col.gameObject; // 🆕 lưu lại object chạm
+                matchedMedicine = col.gameObject;
+                hasEnded = true;
                 StartCoroutine(HandleWinSequence());
                 break;
             }
@@ -36,39 +65,42 @@ public class PlayerController : MonoBehaviour
 
     private IEnumerator HandleWinSequence()
     {
-        hasWon = true;
         if (matchedMedicine != null)
         {
-            // Tween thu nhỏ trước khi ẩn
-            matchedMedicine.transform.DOScale(Vector3.zero, 0.3f)
-                .SetEase(Ease.InBack);
-
-            yield return new WaitForSeconds(0.3f); // chờ tween chạy xong
-
+            matchedMedicine.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack);
+            yield return new WaitForSeconds(0.3f);
             matchedMedicine.SetActive(false);
         }
+
         animator.SetTrigger("Win");
         yield return new WaitForSeconds(GetAnimationLength("Win"));
 
         animator.SetTrigger("Smoke");
         yield return new WaitForSeconds(GetAnimationLength("Smoke"));
 
-        
-
         gameObject.SetActive(false);
     }
 
+    private IEnumerator HandleLoseSequence()
+    {
+        animator.SetTrigger("Lose");
+
+        
+
+        while (true)
+        {
+            yield return null;
+        }
+    }
 
     float GetAnimationLength(string animName)
     {
         RuntimeAnimatorController ac = animator.runtimeAnimatorController;
-
         foreach (var clip in ac.animationClips)
         {
             if (clip.name == animName)
                 return clip.length;
         }
-
         return 1f;
     }
 

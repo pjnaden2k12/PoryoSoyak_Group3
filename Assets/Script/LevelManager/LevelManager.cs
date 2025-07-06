@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
@@ -35,35 +34,33 @@ public class LevelManager : MonoBehaviour
     {
         return PlayerPrefs.GetInt("LevelCompleted_" + mapIndex, 0) == 1;
     }
+
     public void LoadLevel()
     {
         if (selectedMapIndex < 0)
-        {
-            Debug.LogWarning("SelectedMapIndex is invalid. Cannot load level.");
             return;
-        }
 
         MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
-        if (spawner == null)
+        if (spawner != null)
         {
-            Debug.LogError("MapSpawner not found in scene.");
-            return;
-        }
+            spawner.SpawnMap();
 
-        spawner.SpawnMap();
+            // Tắt UI kết quả (win/lose) nếu có
+            if (GameManagerUI.Instance != null)
+            {
+                GameManagerUI.Instance.HideResultPanelAndHomeButton();
+            }
+        }
     }
+
+
     public void ResetLevel()
     {
         MapSpawner spawner = FindFirstObjectByType<MapSpawner>();
         if (spawner != null)
         {
-            spawner.ResetMap();  // Bạn cần thêm hàm ResetMap() trong MapSpawner
+            spawner.ResetMap();
             spawner.SpawnMap();
         }
-        else
-        {
-            Debug.LogError("MapSpawner not found in scene.");
-        }
     }
-
 }

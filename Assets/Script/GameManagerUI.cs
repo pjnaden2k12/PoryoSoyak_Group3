@@ -22,24 +22,50 @@ public class GameManagerUI : MonoBehaviour
     public Sprite loseSprite;
     public static GameManagerUI Instance;
     public GameObject gameUI;
-    void Awake() => Instance = this;
 
+    void Awake() => Instance = this;
 
     void Start()
     {
         pauseButton.gameObject.SetActive(false);
+        homeButton.gameObject.SetActive(false);  // ẩn nút home ban đầu
 
-        // Ẩn trước
         if (gameUI != null)
             gameUI.SetActive(false);
 
-        SetTwoDigitText(requiredTimeText1, requiredTimeText2, Mathf.CeilToInt(GameManager.Instance.requiredTime));
         SetTwoDigitText(elapsedTimeText1, elapsedTimeText2, 0);
 
         GameManager.Instance.OnTimerUpdate += UpdateElapsedTime;
         GameManager.Instance.OnGameStateChanged += UpdateUIState;
         GameManager.Instance.OnGameEnded += OnGameEnded;
         GameManager.Instance.OnGameEnded += HandleGameEnded;
+
+       
+    }
+
+    void OnEnable()
+    {
+        MapSpawner.OnMapSpawned += OnMapSpawnedHandler;
+    }
+
+    void OnDisable()
+    {
+        MapSpawner.OnMapSpawned -= OnMapSpawnedHandler;
+    }
+
+    void OnMapSpawnedHandler()
+    {
+        ShowGameUI();
+        UpdateRequiredTimeDisplay();
+    }
+
+    void UpdateRequiredTimeDisplay()
+    {
+        if (GameManager.Instance != null)
+        {
+            int requiredTime = Mathf.CeilToInt(GameManager.Instance.RequiredTime);
+            SetTwoDigitText(requiredTimeText1, requiredTimeText2, requiredTime);
+        }
     }
 
     void OnDestroy()
@@ -52,12 +78,12 @@ public class GameManagerUI : MonoBehaviour
             GameManager.Instance.OnGameEnded -= HandleGameEnded;
         }
     }
+
     void OnGameEnded(bool isWin)
     {
         playButton.gameObject.SetActive(false);
         pauseButton.gameObject.SetActive(false);
         homeButton.gameObject.SetActive(true);
-
 
         resultPanel.SetActive(true);
         resultImage.gameObject.SetActive(true);
@@ -66,14 +92,11 @@ public class GameManagerUI : MonoBehaviour
         Vector3 targetPos = resultImage.position;
         Vector3 targetScale = resultImage.localScale;
 
-        // Start từ giữa màn hình, lớn lên
         resultImage.position = new Vector3(Screen.width / 2f, Screen.height / 2f, 0f);
         resultImage.localScale = Vector3.zero;
 
-        // Phóng to trước
         resultImage.DOScale(2f, 0.8f).SetEase(Ease.OutBack).OnComplete(() =>
         {
-            // Sau đó vừa di chuyển vừa thu nhỏ về vị trí gốc
             Sequence seq = DOTween.Sequence();
             seq.Append(resultImage.DOMove(targetPos, 0.6f).SetEase(Ease.InOutSine));
             seq.Join(resultImage.DOScale(targetScale, 0.6f).SetEase(Ease.InOutSine));
@@ -185,13 +208,16 @@ public class GameManagerUI : MonoBehaviour
         MedicineAutoMove.isPlayPressed = false;
         DOTween.KillAll();
         GameManager.Instance.ResetGame();
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        LevelManager.Instance.ResetLevel();
+        HideResultPanelAndHomeButton();
+        
     }
+
     void HandleGameEnded(bool isWin)
     {
         DisableAllItems();
-
     }
+
     void DisableAllItems()
     {
         GameObject[] items = GameObject.FindGameObjectsWithTag("Item");
@@ -215,15 +241,6 @@ public class GameManagerUI : MonoBehaviour
             }
         }
     }
-    void OnEnable()
-    {
-        MapSpawner.OnMapSpawned += ShowGameUI;
-    }
-
-    void OnDisable()
-    {
-        MapSpawner.OnMapSpawned -= ShowGameUI;
-    }
 
     void ShowGameUI()
     {
@@ -231,12 +248,23 @@ public class GameManagerUI : MonoBehaviour
         {
             gameUI.SetActive(true);
 
-            // Optional: hiệu ứng hiện lên
             CanvasGroup cg = gameUI.GetComponent<CanvasGroup>();
             if (cg == null) cg = gameUI.AddComponent<CanvasGroup>();
             cg.alpha = 0;
             cg.DOFade(1, 0.5f);
         }
+    }
+    public void HideResultPanelAndHomeButton()
+    {
+        if (playButton != null)
+            playButton.gameObject.SetActive(true);
+        if (resultPanel != null)
+            resultPanel.SetActive(false);
+
+        if (homeButton != null)
+            homeButton.gameObject.SetActive(true);
+        SetTwoDigitText(elapsedTimeText1, elapsedTimeText2, 0);
+        
     }
 
 }

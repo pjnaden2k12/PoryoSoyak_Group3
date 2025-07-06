@@ -2,8 +2,9 @@
 
 public class GameManager : MonoBehaviour
 {
-    public float requiredTime;
+    public GameMapList mapList; // Danh sách map
 
+    private MapData currentMapData;
     private float elapsedTime = 0f;
     private bool isGamePlaying = false;
 
@@ -14,22 +15,38 @@ public class GameManager : MonoBehaviour
 
     public delegate void GameStateChanged(bool isPlaying);
     public event GameStateChanged OnGameStateChanged;
-    public delegate void GameResult(bool isWin); // true = win, false = lose
+
+    public delegate void GameResult(bool isWin);
     public event GameResult OnGameEnded;
+
+    public float RequiredTime => currentMapData != null ? currentMapData.playTimeLimit : 0f;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
+    public void SetCurrentMap(int mapIndex)
+    {
+        if (mapList == null || mapIndex < 0 || mapIndex >= mapList.allMaps.Length)
+        {
+            Debug.LogError("Invalid map index");
+            currentMapData = null;
+            return;
+        }
+        currentMapData = mapList.allMaps[mapIndex];
+        ResetTimer();
+    }
+
     void Update()
     {
-        if (!isGamePlaying) return;
+        if (!isGamePlaying || currentMapData == null) return;
 
         elapsedTime += Time.deltaTime;
 
-        if (elapsedTime > requiredTime)
-            elapsedTime = requiredTime;
+        if (elapsedTime > RequiredTime)
+            elapsedTime = RequiredTime;
 
         int seconds = Mathf.FloorToInt(elapsedTime);
         OnTimerUpdate?.Invoke(seconds);
@@ -40,7 +57,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        if (elapsedTime >= requiredTime)
+        if (elapsedTime >= RequiredTime)
         {
             if (AreAnyMedicineTagsPresent())
                 LoseGame();
@@ -80,9 +97,14 @@ public class GameManager : MonoBehaviour
         Debug.Log("Lose! Vẫn còn medicine tag khi hết thời gian.");
     }
 
-
     public void StartGame()
     {
+        if (currentMapData == null)
+        {
+            Debug.LogError("Không có map hiện tại, không thể bắt đầu game.");
+            return;
+        }
+
         elapsedTime = 0f;
         isGamePlaying = true;
         MedicineAutoMove.isPlayPressed = true;
@@ -105,11 +127,16 @@ public class GameManager : MonoBehaviour
 
     public void ResetGame()
     {
-        elapsedTime = 0f;
+        ResetTimer();
         isGamePlaying = false;
         MedicineAutoMove.isPlayPressed = false;
         OnGameStateChanged?.Invoke(false);
         OnTimerUpdate?.Invoke(0);
+    }
+
+    private void ResetTimer()
+    {
+        elapsedTime = 0f;
     }
 
     public bool IsPlaying()
