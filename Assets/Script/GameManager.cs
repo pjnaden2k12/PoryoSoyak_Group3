@@ -104,12 +104,10 @@ public class GameManager : MonoBehaviour
             Debug.LogError("Không có map hiện tại, không thể bắt đầu game.");
             return;
         }
-
-        elapsedTime = 0f;
         isGamePlaying = true;
         MedicineAutoMove.isPlayPressed = true;
         OnGameStateChanged?.Invoke(true);
-        OnTimerUpdate?.Invoke(0);
+        OnTimerUpdate?.Invoke(Mathf.FloorToInt(elapsedTime));
     }
 
     public void PauseGame()
